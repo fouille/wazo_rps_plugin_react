@@ -15,26 +15,10 @@
     "short": "Plugin de d'automatiqsation de services RPS",
     "full": "Plugin de d'automatiqsation de services RPS."
   },
-  "icons": [
+  "icons": 
     {
       "color": "https://avatars.githubusercontent.com/u/68688703?s=200&v=4"
     },
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
   "staticTabs": [
     {
       "entityId": "portal-rps-provisioning-beta",
