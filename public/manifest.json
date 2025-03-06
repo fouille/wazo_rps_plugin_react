@@ -1,33 +1,24 @@
 {
-  "manifestVersion": "0.1",
-  "version": "1.0.0",
-  "id": "fmw-wazo-plugin-rps",
-  "packageName": "io.wazo.portal.pbx-rps",
-  "productType": "portal",
-  "name" : {
-    "short": "Plugin RPS",
-    "full": "Plugin RPS"
-  },
-  "developer": {
-    "name": "FMW"
-  },
-  "description": {
-    "short": "Plugin de d'automatiqsation de services RPS",
-    "full": "Plugin de d'automatiqsation de services RPS."
-  },
-  "icons": 
+  "short_name": "RPS",
+  "name": "Wazo RPS Plugin",
+  "icons": [
     {
-      "color": "https://avatars.githubusercontent.com/u/68688703?s=200&v=4"
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     },
-  "staticTabs": [
     {
-      "entityId": "portal-rps-provisioning-beta",
-      "context": ["pbxMenu"],
-      "name": "RPS | Beta",
-      "parent": "common.layout.pbxMenu.userManagement",
-      "contentUrl": "./index.html"
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
+  "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"
