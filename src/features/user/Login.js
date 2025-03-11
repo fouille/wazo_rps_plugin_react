@@ -42,11 +42,11 @@ function Login(){
                 <div className=''>
                         <LandingIntro />
                 </div>
-                <div className='py-24 px-10'>
-                    <h2 className='text-2xl font-semibold mb-2 text-center'>Login</h2>
+                <div className='py-24 px-10 items-center'>
+                    <h2 className='text-2xl font-semibold mb-2 text-center'>Accès refusé</h2>
                     <form onSubmit={(e) => submitForm(e)}>
 
-                        <div className="mb-4">
+                        {/* <div className="mb-4">
 
                             <InputText type="emailId" defaultValue={loginObj.emailId} updateType="emailId" containerStyle="mt-4" labelTitle="Email Id" updateFormValue={updateFormValue}/>
 
@@ -58,9 +58,9 @@ function Login(){
                         </div>
 
                         <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
-                        <button type="submit" className={"btn mt-2 w-full btn-primary" + (loading ? " loading" : "")}>Login</button>
+                        <button type="submit" className={"btn mt-2 w-full btn-primary" + (loading ? " loading" : "")}>Login</button> */}
 
-                        <div className='text-center mt-4'>Don't have an account yet? <Link to="/register"><span className="  inline-block  hover:text-primary hover:underline hover:cursor-pointer transition duration-200">Register</span></Link></div>
+                        <div className='text-center mt-4'>Vous n'avez pas les droits suffisants pour accéder à cette page.</div>
                     </form>
                 </div>
             </div>

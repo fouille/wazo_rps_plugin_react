@@ -1,36 +1,77 @@
 import axios from "axios"
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { SetLocalStorage } from "../features/common/baseLocalstorage";
+import { App as Portal } from '@wazo/euc-plugins-sdk';
 
-const checkAuth = () => {
-/*  Getting token value stored in localstorage, if token is not present we will open login page 
-    for all internal dashboard routes  */
-    const TOKEN = localStorage.getItem("token")
-    const PUBLIC_ROUTES = ["login", "forgot-password", "register", "documentation"]
+const portal = new Portal();
+
+const initializePortal = async () => {
+  try {
+    //ici on initialise et retourne de type de compte portal connecte
+    await portal.initialize();
+    const context = portal.getContext();
+    const accountType = context.app.extra.administrator.organization.resource;
+    return accountType;
+
+  } catch (error) {
+    //si il y a une erreur dinitialisation on affiche la page derreur login
+    console.error('Error initializing portal:', error);
+    window.location.href = '/login';
+    return null;
+  }
+};
+
+const checkAccountType = (accountType) => {
+  switch (accountType) {
+    case 'resellers':
+      return true;
+    case 'administrators':
+      return true;
+    case 'customers':
+      return false;
+    case 'locations':
+      return false;
+    default:
+      return false;
+  }
+};
+
+const checkAuth = async () => {
+
+    const accountType = await initializePortal();
+
+    if (!accountType) return;
+
+    const isReseller = checkAccountType(accountType);
+    const PUBLIC_ROUTES = ["login"]
 
     const isPublicPage = PUBLIC_ROUTES.some( r => window.location.href.includes(r))
 
-    if(!TOKEN && !isPublicPage){
+    if(!isReseller && !isPublicPage){
         window.location.href = '/login'
         return;
     }else{
-        // axios.defaults.headers.common['Authorization'] = `Bearer ${TOKEN}`
-
         axios.interceptors.request.use(function (config) {
             // UPDATE: Add this code to show global loading indicator
             document.body.classList.add('loading-indicator');
             return config
           }, function (error) {
             return Promise.reject(error);
-          });
+        });
           
-          axios.interceptors.response.use(function (response) {
+        axios.interceptors.response.use(function (response) {
             // UPDATE: Add this code to hide global loading indicator
             document.body.classList.remove('loading-indicator');
             return response;
           }, function (error) {
             document.body.classList.remove('loading-indicator');
             return Promise.reject(error);
-          });
-        return TOKEN
+        });
+        //ici on initialise le localstorage si pas d'échec dinitialisation ou de droits conforme
+        const context = portal.getContext();
+        await SetLocalStorage(context)
+
+        return isReseller
     }
 }
 

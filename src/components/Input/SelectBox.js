@@ -27,7 +27,7 @@ function SelectBox(props){
             </label>
 
             <select className="select select-bordered w-full" value={value} onChange={(e) => updateValue(e.target.value)}>
-                <option disabled value="PLACEHOLDER">{placeholder}</option>
+                <option value="PLACEHOLDER">{placeholder}</option>
                 {
                     options.map((o, k) => {
                         return <option value={o.value || o.name} key={k}>{o.name}</option>

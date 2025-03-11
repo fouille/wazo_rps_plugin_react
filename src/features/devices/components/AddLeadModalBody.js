@@ -1,79 +1,58 @@
-import { useEffect } from "react"
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 import InputText from '../../../components/Input/InputText'
+import SelectBox from '../../../components/Input/SelectBox'
 import ErrorText from '../../../components/Typography/ErrorText'
-import { showNotification } from "../../common/headerSlice"
-import { addNewLead, getLeadsContent } from "../leadSlice"
-import { randomString, formatMacAddress } from '../../../components/Functions/outils'
-import axios from 'axios'
+import { formatMacAddress } from '../../../components/Functions/outils'
+import { YealinkPostDevice } from "../../settings/yealinksettings/components/postDevices"
+import { parseBrands } from "../../../components/Functions/parseBrands"
 
 const INITIAL_LEAD_OBJ = {
+    brands : [],
     brand : "",
     mac : "",
     uniqueServerUrl : ""
 }
-const yealinkPostDevice = createAsyncThunk('/devices/add', async (device) => {
-    const config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: '/v2/rps/addDevicesByMac',
-        headers: { 
-            'Access-Control-Allow-Origin': '*',
-            'nonce': `${randomString(32)}`,
-            'timestamp': `${Date.now()}`,
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('YealinkToken')}`,
-        },
-        data : JSON.stringify(device),
-        mode: 'cors'
-    };
-    const response =  await axios.request(config)
-        .then((response) => {
-            console.log("Response from Yealink:", response.data);
-            if(response.data.failureCount > 0) { 
-                // console.log(response.data.errors[0].errorInfo);
-                showNotification({message : response.data, status : 0})
-            } else {
-                showNotification({message : "Yealink Added!", status : 1})
-            }
-        })
-            .catch((error) => {
-            console.log("ERREUR YPD0004: " + error);
-        });
-    return response;
-})
 
 function AddLeadModalBody({closeModal}){
     const dispatch = useDispatch()
+    //si présent en localstorage on ajoute la valeur de url de provd dans le lead object par defaut
+    const dataStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
+    const brands = parseBrands(dataStorage.settings)
+    INITIAL_LEAD_OBJ.uniqueServerUrl = (dataStorage) ? dataStorage.global.stackProvURL : ""
+    INITIAL_LEAD_OBJ.brands = brands
+    ////
     const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
     const [leadObj, setLeadObj] = useState(INITIAL_LEAD_OBJ)
 
-
     const saveNewLead = () => {
-        console.log(leadObj);
         if(leadObj.mac.trim() === "")return setErrorMessage("MAC is required!")
         else if(leadObj.uniqueServerUrl.trim() === "")return setErrorMessage("URL is required!")
+        else if(leadObj.brand.trim() === "")return setErrorMessage("Constructeur requis!")
         else{
             const sendDeviceInfo = [{
                 mac: formatMacAddress(leadObj.mac),
-                uniqueServerUrl: leadObj.uniqueServerUrl
+                uniqueServerUrl: leadObj.uniqueServerUrl,
+                brand: leadObj.brand
             }]
-            dispatch(yealinkPostDevice(sendDeviceInfo))
             
-            let newLeadObj = {
-                "id": 1,
-                "mac": leadObj.mac,
-                "uniqueServerUrl": leadObj.uniqueServerUrl,
-                "brand": leadObj.brand,
-                "button": "disabled"
+            if (leadObj.brand === "yealink") {
+                dispatch(YealinkPostDevice(sendDeviceInfo))
+            }else{
+                return setErrorMessage("Constructeur non validé")
             }
-            dispatch(addNewLead({newLeadObj}))
-            dispatch(showNotification({message : "New Device Added!", status : 1}))
+            
+            
+            // let newLeadObj = {
+            //     "id": 1,
+            //     "mac": leadObj.mac,
+            //     "uniqueServerUrl": leadObj.uniqueServerUrl,
+            //     "brand": leadObj.brand,
+            //     "button": "disabled"
+            // }
+            // dispatch(addNewLead({newLeadObj}))
             closeModal()
-            dispatch(getLeadsContent())
         }
     }
 
@@ -87,9 +66,9 @@ function AddLeadModalBody({closeModal}){
 
             <InputText type="text" defaultValue={leadObj.mac} updateType="mac" containerStyle="mt-4" labelTitle="Adresse MAC" updateFormValue={updateFormValue}/>
 
-            <InputText type="text" defaultValue={leadObj.mac} updateType="uniqueServerUrl" containerStyle="mt-4" labelTitle="URL" updateFormValue={updateFormValue}/>
+            <InputText type="text" defaultValue={leadObj.uniqueServerUrl} updateType="uniqueServerUrl" containerStyle="mt-4" labelTitle="URL" updateFormValue={updateFormValue}/>
 
-            <InputText type="text" defaultValue={leadObj.brand} updateType="brand" containerStyle="mt-4" labelTitle="Constructeur" updateFormValue={updateFormValue}/>
+            <SelectBox options={leadObj.brands} defaultValue={leadObj.brand} updateType="brand" containerStyle="mt-4" labelTitle="Constructeur" labelDescription="Ceci vous permet de choisir le bon serveur RPS" placeholder="Choisir" updateFormValue={updateFormValue}/>
 
 
             <ErrorText styleClass="mt-16">{errorMessage}</ErrorText>

@@ -15,9 +15,6 @@ const GigasetSettings = lazy(() => import('../pages/protected/GigasetSettings'))
 const FanvilSettings = lazy(() => import('../pages/protected/FanvilSettings'))
 const YealinkSettings = lazy(() => import('../pages/protected/YealinkSettings'))
 const SnomSettings = lazy(() => import('../pages/protected/SnomSettings'))
-const GettingStarted = lazy(() => import('../pages/GettingStarted'))
-const DocFeatures = lazy(() => import('../pages/DocFeatures'))
-const DocComponents = lazy(() => import('../pages/DocComponents'))
 
 
 const routes = [
@@ -56,18 +53,6 @@ const routes = [
   {
     path: '/settings-snom',
     component: SnomSettings,
-  },
-  {
-    path: '/getting-started',
-    component: GettingStarted,
-  },
-  {
-    path: '/features',
-    component: DocFeatures,
-  },
-  {
-    path: '/components',
-    component: DocComponents,
   },
   {
     path: '/integration',

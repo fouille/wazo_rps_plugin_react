@@ -1,6 +1,6 @@
 {
     "manifestVersion": "0.1",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "id": "fmw-wazo-plugin-rps",
     "packageName": "io.wazo.portal.pbx-rps",
     "productType": "portal",
@@ -12,8 +12,8 @@
       "name": "FMW"
     },
     "description": {
-      "short": "Plugin de d'automatiqsation de services RPS",
-      "full": "Plugin de d'automatiqsation de services RPS."
+      "short": "Plugin de d'automatisation de services RPS",
+      "full": "Plugin de d'automatisation de services RPS."
     },
     "icons": 
       {
