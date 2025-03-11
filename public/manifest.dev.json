@@ -1,19 +1,19 @@
 {
     "manifestVersion": "0.1",
     "version": "1.0.2",
-    "id": "fmw-wazo-plugin-rps",
-    "packageName": "io.wazo.portal.pbx-rps",
+    "id": "fmw-wazo-plugin-rps-beta",
+    "packageName": "io.wazo.portal.pbx-rps-beta",
     "productType": "portal",
     "name" : {
-      "short": "Dev Plugin RPS",
-      "full": "Dev Plugin RPS"
+      "short": "Beta | Plugin RPS",
+      "full": "Beta | Plugin RPS"
     },
     "developer": {
       "name": "FMW"
     },
     "description": {
-      "short": "Plugin de d'automatisation de services RPS",
-      "full": "Plugin de d'automatisation de services RPS."
+      "short": "Beta | Plugin de d'automatisation de services RPS",
+      "full": "Beta | Plugin de d'automatisation de services RPS."
     },
     "icons": 
       {
@@ -21,9 +21,9 @@
       },
     "staticTabs": [
       {
-        "entityId": "portal-rps-provisioning-beta-dev",
+        "entityId": "portal-rps-provisioning-beta",
         "context": ["pbxMenu"],
-        "name": "RPS | Dev",
+        "name": "RPS | Beta",
         "parent": "common.layout.pbxMenu.userManagement",
         "contentUrl": "./index.html"
       }

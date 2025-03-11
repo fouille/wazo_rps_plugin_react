@@ -1,6 +1,6 @@
 {
   "manifestVersion": "0.1",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "id": "fmw-wazo-plugin-rps",
   "packageName": "io.wazo.portal.pbx-rps",
   "productType": "portal",
@@ -21,9 +21,9 @@
     },
   "staticTabs": [
     {
-      "entityId": "portal-rps-provisioning-beta",
+      "entityId": "portal-rps-provisioning",
       "context": ["pbxMenu"],
-      "name": "RPS | Beta",
+      "name": "RPS",
       "parent": "common.layout.pbxMenu.userManagement",
       "contentUrl": "./index.html"
     }
