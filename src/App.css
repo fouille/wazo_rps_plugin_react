@@ -12,6 +12,12 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+/* modification largeur menu gauche (leftsidebar) 240px au lieu de "auto" pour correspondre au style Portal */
+@media (min-width: 1024px) {
+  .lg\:drawer-open > .drawer-toggle ~ .drawer-side {
+      width: 240px;
+  }
+}
 
 .App-header {
   background-color: #282c34;

@@ -58,7 +58,7 @@ function YealinkSettings(){
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputText labelTitle="AccessKey ID" defaultValue={INITIAL_YEALINK_OBJ.id} updateType="id" updateFormValue={updateFormValue}/>
-                    <InputText labelTitle="AccessKey Secret" defaultValue={INITIAL_YEALINK_OBJ.secret} updateType="secret" updateFormValue={updateFormValue}/>
+                    <InputText type="password" labelTitle="AccessKey Secret" defaultValue={INITIAL_YEALINK_OBJ.secret} updateType="secret" updateFormValue={updateFormValue}/>
                     {/* <InputText labelTitle="Title" defaultValue="UI/UX Designer" updateFormValue={updateFormValue}/>
                     <InputText labelTitle="Place" defaultValue="California" updateFormValue={updateFormValue}/>
                     <TextAreaInput labelTitle="About" defaultValue="Doing what I love, part time traveller" updateFormValue={updateFormValue}/> */}
