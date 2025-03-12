@@ -6,8 +6,14 @@ import { openModal } from "../common/modalSlice"
 import { deleteLead, getLeadsContent, setTokenRefreshing } from "./leadSlice"
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon'
+import { parseBrands } from "../../components/Functions/parseBrands"
 
 const TopSideButtons = () => {
+    const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
+
+    //on regarde si un brand est actif, si cest le cas on retourne, si ce n'est pas le cas "disabled", dans ce dernier on affiche pas le bouton "ajouter"
+    const brands = parseBrands(storage.settings)
+    const brandEnabled = (brands.length > 0)? "" : "disabled"
 
     const dispatch = useDispatch()
 
@@ -18,7 +24,7 @@ const TopSideButtons = () => {
     return(
         <div className="inline-block float-right">
             <button className="btn px-6 btn-sm normal-case btn-disable mr-5" onClick={() => dispatch(getLeadsContent())}>Actualiser</button>
-            <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => openAddNewLeadModal()}>Ajouter</button>
+            <button disabled={brandEnabled} className="btn px-6 btn-sm normal-case btn-primary" onClick={() => openAddNewLeadModal()}>Ajouter</button>
         </div>
     )
 }
@@ -26,7 +32,7 @@ const TopSideButtons = () => {
 function Devices(){
 
     const {leads, isLoading, isTokenRefreshing } = useSelector(state => state.lead)
-    console.log(leads);
+    // console.log(leads);
     
     const dispatch = useDispatch()
 

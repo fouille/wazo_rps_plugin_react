@@ -34,7 +34,10 @@ function AddLeadModalBody({closeModal}){
             const sendDeviceInfo = [{
                 mac: formatMacAddress(leadObj.mac),
                 uniqueServerUrl: leadObj.uniqueServerUrl,
-                brand: leadObj.brand
+                brand: leadObj.brand,
+                tenantUUID: dataStorage.global.stackTenantUUID,
+                tokenUUID: dataStorage.global.stackToken,
+                domainURL: dataStorage.global.stackDomain
             }]
             
             if (leadObj.brand === "yealink") {

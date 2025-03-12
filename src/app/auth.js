@@ -69,6 +69,8 @@ const checkAuth = async () => {
         });
         //ici on initialise le localstorage si pas d'échec dinitialisation ou de droits conforme
         const context = portal.getContext();
+        console.log(context);
+        
         await SetLocalStorage(context)
 
         return isReseller

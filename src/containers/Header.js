@@ -3,8 +3,8 @@ import React, {  useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 // import BellIcon  from '@heroicons/react/24/outline/BellIcon'
 import Bars3Icon  from '@heroicons/react/24/outline/Bars3Icon'
-// import MoonIcon from '@heroicons/react/24/outline/MoonIcon'
-// import SunIcon from '@heroicons/react/24/outline/SunIcon'
+import MoonIcon from '@heroicons/react/24/outline/MoonIcon'
+import SunIcon from '@heroicons/react/24/outline/SunIcon'
 import { openRightDrawer } from '../features/common/rightDrawerSlice';
 import { RIGHT_DRAWER_TYPES } from '../utils/globalConstantUtil'
 
@@ -72,11 +72,11 @@ function Header(){
 
 
             {/* Light and dark theme selection toogle **/}
-            {/* <label className="swap ">
+            <label className="swap ">
                 <input type="checkbox"/>
                 <SunIcon data-set-theme="light" data-act-class="ACTIVECLASS" className={"fill-current w-6 h-6 "+(currentTheme === "dark" ? "swap-on" : "swap-off")}/>
                 <MoonIcon data-set-theme="dark" data-act-class="ACTIVECLASS" className={"fill-current w-6 h-6 "+(currentTheme === "light" ? "swap-on" : "swap-off")} />
-            </label> */}
+            </label>
 
 
                 {/* Notification icon */}

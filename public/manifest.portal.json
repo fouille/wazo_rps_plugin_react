@@ -1,19 +1,19 @@
 {
   "manifestVersion": "0.1",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "id": "fmw-wazo-plugin-rps",
   "packageName": "io.wazo.portal.pbx-rps",
   "productType": "portal",
   "name" : {
-    "short": "Plugin RPS",
-    "full": "Plugin RPS"
+    "short": "Plugin Wazo <> RPS",
+    "full": "Plugin Wazo <> RPS"
   },
   "developer": {
     "name": "FMW"
   },
   "description": {
-    "short": "Plugin de d'automatisation de services RPS",
-    "full": "Plugin de d'automatisation de services RPS."
+    "short": "Plugin d'automatisation RPS",
+    "full": "Plugin d'automatisation de création de périphériques dans un site Wazo EUC et dans un RPS de destination (Gigaset, Fanvil, Snom et Yealink)"
   },
   "icons": 
     {
@@ -23,7 +23,7 @@
     {
       "entityId": "portal-rps-provisioning",
       "context": ["pbxMenu"],
-      "name": "RPS",
+      "name": "Provisionning RPS",
       "parent": "common.layout.pbxMenu.userManagement",
       "contentUrl": "./index.html"
     }

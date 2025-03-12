@@ -4,6 +4,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { randomString } from '../../../../components/Functions/outils.js'
 import { showNotification } from '../../../common/headerSlice.js'
 import { setTokenRefreshing } from '../../../devices/leadSlice.js'
+import { WazoCreateDevice } from '../../../devices/components/WazoLead.js'
 import { YealinkGetToken } from './getToken'
 
 export const YealinkPostDevice = createAsyncThunk('/devices/add', async (_, { dispatch }) => {
@@ -32,7 +33,10 @@ export const YealinkPostDevice = createAsyncThunk('/devices/add', async (_, { di
                 // console.log(response.data.errors[0].errorInfo);
                 dispatch(showNotification({message : response.data.errors[0].errorInfo, status : 0}))
             } else {
-                dispatch(showNotification({message : `Yealink Added!`, status : 1}))
+                dispatch(showNotification({message : `Yealink RPS Ok!`, status : 1}))
+                device.map((l) => {
+                    dispatch(WazoCreateDevice(l))
+                })
                 dispatch(setTokenRefreshing(true));
             }
         })

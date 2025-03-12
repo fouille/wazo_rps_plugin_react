@@ -5,6 +5,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { randomString } from '../../components/Functions/outils'
 import { YealinkGetToken } from '../settings/yealinksettings/components/getToken'
 import { showNotification } from '../common/headerSlice'
+import { parseBrands } from '../../components/Functions/parseBrands'
 
 import axios from 'axios'
 
@@ -17,42 +18,50 @@ export const getLeadsContent = createAsyncThunk('/leads/content', async (_, { di
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${yealinkToken.settings.yealink.token}`
     }
+    //on regarde si un brand est actif, si cest le cas on retour "true", si ce n'est pas le cas "false", dans ce dernier cas on exécute pas l'appel API
+    const brands = parseBrands(yealinkToken.settings)
+    const brandEnabled = (brands.length > 0)? true : false
+    if (brandEnabled) {
+        const response = await axios.post('/v2/rps/listDevices', 
+            {
+                "skip": 0,
+                "limit": 20,
+                "autoCount": true
+            },
+            {
+                headers: headers
+            }
+        )
+        .then((response) => {
+            const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
+            const serverFilter = storage.global.stackProvURL
+            const donnees = response.data.data
+            const filteredData = donnees
+                .filter(l => l.serverUrl === serverFilter || l.uniqueServerUrl === serverFilter)
+                .map(l => ({ ...l, brand: "Yealink" }));
+            return filteredData
+        })
+        .catch(async (error) => {
+            if (error.status === 401) {
+                console.log('Token expired');
+                console.log('Getting new token');
+                
+                dispatch(showNotification({message : "Rafraîchissement du token en cours", status : 1}))
+    
+                dispatch(YealinkGetToken(dispatch));
+                console.log('Token refreshed');
+                console.log('Reloading data');
+            } else {
+                console.log(error);
+                throw error;
+            } 
+        })
 
-    const response = await axios.post('/v2/rps/listDevices', 
-        {
-            "skip": 0,
-            "limit": 20,
-            "autoCount": true
-        },
-        {
-            headers: headers
-        }
-    )
-    .then((response) => {
-        const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-        const serverFilter = storage.global.stackProvURL
-        const donnees = response.data.data
-        const filteredData = donnees
-            .filter(l => l.serverUrl === serverFilter || l.uniqueServerUrl === serverFilter)
-            .map(l => ({ ...l, brand: "Yealink" }));
-        return filteredData
-    })
-    .catch(async (error) => {
-        if (error.status === 401) {
-            console.log('Token expired');
-            console.log('Getting new token');
-            
-            dispatch(showNotification({message : "Rafraîchissement du token en cours", status : 1}))
-
-            dispatch(YealinkGetToken(dispatch));
-            console.log('Token refreshed');
-            console.log('Reloading data');
-        } else {
-            console.log(error);
-            throw error;
-        } 
-    })
-    return response
+        return response
+    } else {
+        dispatch(showNotification({message : "Il n'y a pas de RPS actif", status : 0}))
+        return []
+    }
 })
 
 export const leadsSlice = createSlice({
