@@ -6,11 +6,16 @@ import { showNotification } from '../../../common/headerSlice.js'
 import { setTokenRefreshing } from '../../../devices/leadSlice.js'
 import { WazoCreateDevice } from '../../../devices/components/WazoLead.js'
 import { YealinkGetToken } from './getToken'
+import { transformData } from '../../../../components/Functions/outils.js'
 
 export const YealinkPostDevice = createAsyncThunk('/devices/add', async (_, { dispatch }) => {
     const yealinkToken = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-    console.log(_);
-    const device = _
+
+    // Transformation des données
+    const transformedData = transformData(_)
+    // const transformedData = ""
+    console.log(transformedData);
+    
     const config = {
         method: 'post',
         maxBodyLength: Infinity,
@@ -22,23 +27,46 @@ export const YealinkPostDevice = createAsyncThunk('/devices/add', async (_, { di
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${yealinkToken.settings.yealink.token}`,
         },
-        data : JSON.stringify(device),
+        data : JSON.stringify(transformedData.for_brands),
         mode: 'cors'
     };
+
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
     const response =  await axios.request(config)
-        .then((response) => {
+        .then(async (response) => {
             
             console.log("Response from Yealink:", response.data);
             if(response.data.failureCount > 0) { 
-                // console.log(response.data.errors[0].errorInfo);
-                dispatch(showNotification({message : response.data.errors[0].errorInfo, status : 0}))
-            } else {
-                dispatch(showNotification({message : `Yealink RPS Ok!`, status : 1}))
-                device.map((l) => {
-                    dispatch(WazoCreateDevice(l))
-                })
-                dispatch(setTokenRefreshing(true));
+                response.data.errors.forEach(async (error, index) => {
+                    await delay(100);
+                    dispatch(showNotification({message : `Mac ${error.mac} : ${error.errorInfo}`, status : 0}));
+                });
+                await delay(100);
+                dispatch(showNotification({message : "Wazo : Pas de création de périphérique possible", status : 0}));
             }
+            
+            if (response.data.successCount > 0) {
+                await delay(100);
+                dispatch(showNotification({message : `Yealink RPS Ok!`, status : 1}));
+            }
+            
+            if (response.data.successCount === response.data.total) {
+                for (const brand of transformedData.for_brands) {
+                    const deviceData = {
+                        mac: brand.mac,
+                        tenantUUID: transformedData.for_wazo.tenantUUID,
+                        tokenUUID: transformedData.for_wazo.tokenUUID,
+                        domainURL: transformedData.for_wazo.domainURL
+                    };
+                    dispatch(WazoCreateDevice(deviceData));
+                    await delay(1000); // Pause de 1 seconde
+                }
+            }
+
+            await delay(100)
+            dispatch(showNotification({message : `RPS : ${response.data.successCount}/${response.data.total} created`, status : 1}));
+            dispatch(setTokenRefreshing(true));
         })
         .catch((error) => {
         console.log("ERREUR YPD0004: " + error)

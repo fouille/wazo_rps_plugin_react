@@ -28,6 +28,8 @@ export const WazoCreateDevice = createAsyncThunk('/wazo/add', async (device, { d
         console.log(error);
         if (error.status === 401) {
             dispatch(showNotification({message : "Wazo : " + error.response.statusText, status : 0}))
+        } else if (error.status === 400) {
+            dispatch(showNotification({message : "Wazo : " + error.response.data[0], status : 0}))
         } else {
             console.log(error);
             throw error;

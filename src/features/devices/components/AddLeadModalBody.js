@@ -31,16 +31,18 @@ function AddLeadModalBody({closeModal}){
         else if(leadObj.uniqueServerUrl.trim() === "")return setErrorMessage("URL is required!")
         else if(leadObj.brand.trim() === "")return setErrorMessage("Constructeur requis!")
         else{
-            const sendDeviceInfo = [{
+            const sendDeviceInfo = {
                 mac: formatMacAddress(leadObj.mac),
                 uniqueServerUrl: leadObj.uniqueServerUrl,
                 brand: leadObj.brand,
                 tenantUUID: dataStorage.global.stackTenantUUID,
                 tokenUUID: dataStorage.global.stackToken,
                 domainURL: dataStorage.global.stackDomain
-            }]
+            }
             
             if (leadObj.brand === "yealink") {
+                console.log(sendDeviceInfo);
+                
                 dispatch(YealinkPostDevice(sendDeviceInfo))
             }else{
                 return setErrorMessage("Constructeur non validé")
