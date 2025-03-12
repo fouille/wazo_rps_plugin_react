@@ -1,14 +1,16 @@
-import moment from "moment"
-import { useEffect } from "react"
+
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux"
+import moment from "moment"
 import TitleCard from "../../components/Cards/TitleCard"
 import { openModal } from "../common/modalSlice"
 import { deleteLead, getLeadsContent, setTokenRefreshing } from "./leadSlice"
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
+import CheckBox from "../../components/Input/CheckBox"
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon'
 import { parseBrands } from "../../components/Functions/parseBrands"
 
-const TopSideButtons = () => {
+const TopSideButtons = ({ isDeleteEnabled, onDelete }) => {
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
     //on regarde si un brand est actif, si cest le cas on retourne, si ce n'est pas le cas "disabled", dans ce dernier on affiche pas le bouton "ajouter"
@@ -24,6 +26,7 @@ const TopSideButtons = () => {
     return(
         <div className="inline-block float-right">
             <button className="btn px-6 btn-sm normal-case btn-disable mr-5" onClick={() => dispatch(getLeadsContent())}>Actualiser</button>
+            <button disabled={!isDeleteEnabled} className="btn px-6 btn-sm normal-case btn-error mr-5" onClick={onDelete}>Supprimer</button>
             <button disabled={brandEnabled} className="btn px-6 btn-sm normal-case btn-primary" onClick={() => openAddNewLeadModal()}>Ajouter</button>
         </div>
     )
@@ -36,6 +39,8 @@ function Devices(){
     
     const dispatch = useDispatch()
 
+    const [checkedItems, setCheckedItems] = useState({});
+
     useEffect(() => {
         console.log("Dispatch getLeadsContent...");
         if (isTokenRefreshing) {
@@ -45,25 +50,45 @@ function Devices(){
             dispatch(getLeadsContent())
         }
     }, [isTokenRefreshing, dispatch]);
-    
 
-    // const getDummyStatus = (index) => {
-    //     if(index % 5 === 0)return <div className="badge">Not Interested</div>
-    //     else if(index % 5 === 1)return <div className="badge badge-primary">In Progress</div>
-    //     else if(index % 5 === 2)return <div className="badge badge-secondary">Sold</div>
-    //     else if(index % 5 === 3)return <div className="badge badge-accent">Need Followup</div>
-    //     else return <div className="badge badge-ghost">Open</div>
-    // }
+    const deleteCurrentLead = (index) => {    
+        
 
-    const deleteCurrentLead = (index) => {       
+        console.log("delecurrent", index);
+        
         dispatch(openModal({title : "Confirmation", bodyType : MODAL_BODY_TYPES.CONFIRMATION, 
         extraObject : { message : `Are you sure you want to delete this ?`, type : CONFIRMATION_MODAL_CLOSE_TYPES.LEAD_DELETE, index}}))
     }
 
+    const handleCheckBoxChange = (id, { value }) => {
+        console.log(value);
+        setCheckedItems(prevState => ({
+            ...prevState,
+            [id]: value
+        }));
+    };
+
+    const handleDelete = () => {
+        const checkedIds = Object.keys(checkedItems).filter(id => checkedItems[id]);
+        console.log("Checked IDs to delete:", checkedIds);
+        const payload = checkedIds.join(',');
+        // console.log("Payload to send:", checkedIds);
+        
+        deleteCurrentLead(checkedIds)
+
+        // Envoyer la liste des IDs cochés pour suppression
+        // Par exemple, vous pouvez appeler une action Redux pour supprimer les éléments
+        // checkedIds.forEach(id => {
+        //     dispatch(deleteLead(id));
+        // });
+    };
+
+    const isDeleteEnabled = Object.values(checkedItems).some(isChecked => isChecked);
+
     return(
         <>
             
-            <TitleCard title="Liste des périphériques" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
+            <TitleCard title="Liste des périphériques" topMargin="mt-2" TopSideButtons={<TopSideButtons isDeleteEnabled={isDeleteEnabled} onDelete={handleDelete} />}>
 
                 {/* Leads List in table format loaded from slice after api call */}
             <div className="overflow-x-auto w-full">
@@ -76,21 +101,26 @@ function Devices(){
                         <th>Bound</th>
                         <th>URL</th>
                         <th></th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
                         {
                             leads.map((l, k) => {
+                                let mac = l.mac
+                                let macFormatted = mac.match(/.{1,2}/g).join(':')
+
                                 return(
                                     <tr key={k}>
                                     <td>
-                                        <div className="font-bold">{l.mac}</div>
+                                        <div className="font-bold">{macFormatted}</div>
                                     </td>
                                     <td>{(l.brand)?l.brand:""}</td>
                                     <td>{moment(l.dateRegistered).format("DD MMM YY")}</td>
                                     <td>{(l.lastConnected)?<div className="badge badge-success">{moment(l.dateRegistered).format("DD MMM YY | hh:mm:ss")}</div> : <div className="badge badge-warning">Jamais vu</div>}</td>
                                     <td>{l.serverUrl ? l.serverUrl : l.uniqueServerUrl}</td>
                                     <td><button disabled={(l.button)? l.button:""} className="btn btn-square btn-ghost" onClick={() => deleteCurrentLead(l.id)}><TrashIcon className="w-5"/></button></td>
+                                    <td><CheckBox updateType={l.id} defaultValue={checkedItems[l.id]} updateFormValue={(e) => handleCheckBoxChange(l.id, e)} /></td>
                                     </tr>
                                 )
                             })

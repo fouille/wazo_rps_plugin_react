@@ -21,7 +21,15 @@ export const YealinkDelDevice = async (devices, dispatch) => {
     };
     const response =  await axios.request(config)
     .then((response) => {
-        dispatch(showNotification({message : "Supprimé du RPS", status : 1}))
+      console.log(response);
+      
+        if(response.data.failureCount > 0){
+          dispatch(showNotification({message : response.errors[0].msg, status : 0}))
+        }
+        if (response.data.successCount > 0) {
+          dispatch(showNotification({message : "Supprimé.s du RPS", status : 1}))
+        }
+        
     })
     .catch((error) => {
       console.log(error)
