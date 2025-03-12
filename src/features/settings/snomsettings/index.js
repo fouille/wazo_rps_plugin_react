@@ -24,11 +24,11 @@ function SnomSettings(){
     return(
         <>
             
-            <TitleCard title="Snom Settings" topMargin="mt-2">
+            <TitleCard title="Paramétrage (Non disponible actuellement)" topMargin="mt-2">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InputText labelTitle="AccessKey ID" defaultValue="xxxxxxxxxx" updateFormValue={updateFormValue}/>
-                    <InputText labelTitle="AccessKey Secret" defaultValue="xxxxxxxxxxxx" updateFormValue={updateFormValue}/>
+                    <InputText disabled labelTitle="AccessKey ID" defaultValue="xxxxxxxxxx" updateFormValue={updateFormValue}/>
+                    <InputText disabled labelTitle="AccessKey Secret" defaultValue="xxxxxxxxxxxx" updateFormValue={updateFormValue}/>
                     {/* <InputText labelTitle="Title" defaultValue="UI/UX Designer" updateFormValue={updateFormValue}/>
                     <InputText labelTitle="Place" defaultValue="California" updateFormValue={updateFormValue}/>
                     <TextAreaInput labelTitle="About" defaultValue="Doing what I love, part time traveller" updateFormValue={updateFormValue}/> */}
@@ -39,11 +39,11 @@ function SnomSettings(){
                     {/* <InputText labelTitle="Language" defaultValue="English" updateFormValue={updateFormValue}/>
                     <InputText labelTitle="Timezone" defaultValue="IST" updateFormValue={updateFormValue}/>
                     <ToogleInput updateType="syncData" labelTitle="Sync Data" defaultValue={true} updateFormValue={updateFormValue}/> */}
-                    <ToogleInput updateType="Activer" labelTitle="Activer" defaultValue={false} updateFormValue={updateFormValue}/>
+                    <ToogleInput disabled updateType="Activer" labelTitle="Activer" defaultValue={false} updateFormValue={updateFormValue}/>
                 </div>
                 
 
-                <div className="mt-16"><button className="btn btn-primary float-right" onClick={() => updateProfile()}>Enregistrer</button></div>
+                <div className="mt-16"><button disabled className="btn btn-primary float-right" onClick={() => updateProfile()}>Enregistrer</button></div>
             </TitleCard>
         </>
     )

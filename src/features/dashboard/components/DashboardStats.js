@@ -1,6 +1,8 @@
-function DashboardStats({title, icon, value, description, colorIndex}){
+import CircleStackIcon  from '@heroicons/react/24/outline/CircleStackIcon'
 
-    const COLORS = ["primary", "primary"]
+function DashboardStats({title, value, description, colorIndex}){
+
+    const COLORS = ["primary", "secondary"]
 
     const getDescStyle = () => {
         if(description.includes("↗︎"))return "font-bold text-green-700 dark:text-green-300"
@@ -11,9 +13,9 @@ function DashboardStats({title, icon, value, description, colorIndex}){
     return(
         <div className="stats shadow">
             <div className="stat">
-                <div className={`stat-figure dark:text-slate-300 text-${COLORS[colorIndex%2]}`}>{icon}</div>
+                <div className={`stat-figure dark:text-slate-300 text-${COLORS[colorIndex]}`}><CircleStackIcon className='w-8 h-8'/></div>
                 <div className="stat-title dark:text-slate-300">{title}</div>
-                <div className={`stat-value dark:text-slate-300 text-${COLORS[colorIndex%2]}`}>{value}</div>
+                <div className={`stat-value dark:text-slate-300 text-${COLORS[colorIndex]}`}>{value}</div>
                 <div className={"stat-desc  " + getDescStyle()}>{description}</div>
             </div>
         </div>
