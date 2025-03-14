@@ -1,3 +1,4 @@
+// Generateur de string ramdon
 export const randomString = (length=1) => {
     const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -7,7 +8,10 @@ export const randomString = (length=1) => {
     }
     return result;
 }
+// convertisseur de mac address au format sans ":" (utiliser pour reformater les macs en provenance de Wazo)
+export const convertMacFormat = (mac) => mac.replace(/:/g, '');
 
+//formateur de mac address au format xx:xx:xx:xx:xx retourne sous forme de tableau
 export const formatMacAddress = (macs) => {
   // Split the input string by commas, spaces, or semicolons to get individual MAC addresses
   const macArray = macs.split(/[,;]\s*/);
@@ -21,6 +25,7 @@ export const formatMacAddress = (macs) => {
   });
 };
 
+//transforamtion de données utilisée pour l'envoi de masse aux RPS Yealink et Wazo
 export const transformData = (data) => {
   
   const for_brands = [];
@@ -46,3 +51,22 @@ export const transformData = (data) => {
   return global
   
 };
+
+//Fonction pour retourner le serveur de provisionning entre http, https ou Custom
+export const stackServerProvdURL = (getStorage) => {
+  const dataProv = getStorage.global.stackProvSettings
+
+  if (dataProv.customProv.enabledCustom) {
+    if (dataProv.customProv.enabledCustom_https) {
+      return dataProv.customProv.stackCustomProvHTTPS
+    } else {
+      return dataProv.customProv.stackCustomProvURL
+    }
+  } else {
+    if (dataProv.enabled_https) {
+      return dataProv.stackProvHTTPS
+    } else {
+      return dataProv.stackProvURL
+    }
+  }
+}

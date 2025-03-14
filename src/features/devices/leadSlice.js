@@ -1,63 +1,48 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-import { randomString } from '../../components/Functions/outils'
-import { YealinkGetToken } from '../settings/yealinksettings/components/getToken'
 import { showNotification } from '../common/headerSlice'
 import { parseBrands } from '../../components/Functions/parseBrands'
+import { yealinkListDevices } from "../settings/yealinksettings/components/yealinkListDevices"
+import { wazoListDevices } from "../settings/wazosettings/WazoCallFunction"
+import { gearRender } from "./components/GearRender"
 
-import axios from 'axios'
-
-export const getLeadsContent = createAsyncThunk('/leads/content', async (_, { dispatch }) => {
-    const yealinkToken = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-    const headers = { 
-        'Access-Control-Allow-Origin': '*',
-        'Nonce': randomString(32),
-        'Timestamp': Date.now(),
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${yealinkToken.settings.yealink.token}`
-    }
-    //on regarde si un brand est actif, si cest le cas on retour "true", si ce n'est pas le cas "false", dans ce dernier cas on exécute pas l'appel API
-    const brands = parseBrands(yealinkToken.settings)
-    const brandEnabled = (brands.length > 0)? true : false
-    if (brandEnabled) {
-        const response = await axios.post('/v2/rps/listDevices', 
-            {
-                "skip": 0,
-                "limit": 20,
-                "autoCount": true
-            },
-            {
-                headers: headers
-            }
-        )
-        .then((response) => {
-            const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-            const serverFilter = storage.global.stackProvURL
-            const donnees = response.data.data
-            const filteredData = donnees
-                .filter(l => l.serverUrl === serverFilter || l.uniqueServerUrl === serverFilter)
-                .map(l => ({ ...l, brand: "Yealink" }));
-            return filteredData
-        })
-        .catch(async (error) => {
-            if (error.status === 401) {
-                console.log('Token expired');
-                console.log('Getting new token');
-                
-                dispatch(showNotification({message : "Rafraîchissement du token en cours", status : 1}))
+export const getLeadsContent = createAsyncThunk('/leads/content', async (_, {dispatch}) => {
+    const getStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     
-                dispatch(YealinkGetToken(dispatch));
-                console.log('Token refreshed');
-                console.log('Reloading data');
-            } else {
-                console.log(error);
-                throw error;
-            } 
-        })
-
-        return response
+    //on regarde si un brand est actif, si cest le cas on retour "true", si ce n'est pas le cas "false", dans ce dernier cas on exécute pas l'appel API
+    const brands = parseBrands(getStorage.settings)
+    const brandEnabled = (brands.length > 0)? true : false
+    
+    if (brandEnabled) {
+        const results = [];
+        
+        for (const b of brands) {
+            if (b.value === "yealink") {
+                dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
+                const dataFromYealink = await yealinkListDevices(dispatch)
+                const dataFromWazo = await wazoListDevices(dispatch)
+                // console.log(dataFromWazo);
+                const gearData = await gearRender(dataFromWazo, dataFromYealink, dispatch)
+                console.log(gearData);
+                
+                results.push(...gearData)
+            }
+            if (b.value === "fanvil") {
+                dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
+                // Ajoutez ici l'appel API pour fanvil si nécessaire
+            }
+            if (b.value === "snom") {
+                dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
+                // Ajoutez ici l'appel API pour snom si nécessaire
+            }
+            if (b.value === "gigaset") {
+                dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
+                // Ajoutez ici l'appel API pour gigaset si nécessaire
+            }
+        }
+        
+        return results;
     } else {
         dispatch(showNotification({message : "Il n'y a pas de RPS actif", status : 0}))
         return []
@@ -93,7 +78,7 @@ export const leadsSlice = createSlice({
             state.isLoading = true;
         },
         [getLeadsContent.fulfilled]: (state, action) => {
-            // console.log("DONNEES RECUES :", action.payload);
+            // console.log("getLeadsContent DONNEES RECUES :", action);
             
             if (Array.isArray(action.payload)) {
                 state.leads = action.payload;

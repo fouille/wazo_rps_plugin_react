@@ -1,11 +1,15 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import InputText from '../../../components/Input/InputText'
 import SelectBox from '../../../components/Input/SelectBox'
 import ErrorText from '../../../components/Typography/ErrorText'
 import { formatMacAddress } from '../../../components/Functions/outils'
 import { YealinkPostDevice } from "../../settings/yealinksettings/components/postDevices"
+import { wazoCreateDevice } from "../../settings/wazosettings/WazoCallFunction"
 import { parseBrands } from "../../../components/Functions/parseBrands"
+import { stackServerProvdURL } from "../../../components/Functions/outils"
+import { transformData } from "../../../components/Functions/outils"
+import { getLeadsContent } from "../leadSlice"
 
 const INITIAL_LEAD_OBJ = {
     brands : [],
@@ -19,14 +23,14 @@ function AddLeadModalBody({closeModal}){
     //si présent en localstorage on ajoute la valeur de url de provd dans le lead object par defaut
     const dataStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     const brands = parseBrands(dataStorage.settings)
-    INITIAL_LEAD_OBJ.uniqueServerUrl = (dataStorage) ? dataStorage.global.stackProvURL : ""
+    INITIAL_LEAD_OBJ.uniqueServerUrl = stackServerProvdURL(dataStorage)
     INITIAL_LEAD_OBJ.brands = brands
     ////
     const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
     const [leadObj, setLeadObj] = useState(INITIAL_LEAD_OBJ)
 
-    const saveNewLead = () => {
+    const saveNewLead = async () => {
         if(leadObj.mac.trim() === "")return setErrorMessage("MAC is required!")
         else if(leadObj.uniqueServerUrl.trim() === "")return setErrorMessage("URL is required!")
         else if(leadObj.brand.trim() === "")return setErrorMessage("Constructeur requis!")
@@ -39,15 +43,25 @@ function AddLeadModalBody({closeModal}){
                 tokenUUID: dataStorage.global.stackToken,
                 domainURL: dataStorage.global.stackDomain
             }
-            
+
             if (leadObj.brand === "yealink") {
                 console.log(sendDeviceInfo);
-                
-                dispatch(YealinkPostDevice(sendDeviceInfo))
+                const devices = transformData(sendDeviceInfo)
+                setLoading(true) // Définir loading sur true avant les appels asynchrones
+                try {
+                    await YealinkPostDevice(devices, dispatch)
+                    await wazoCreateDevice(devices, dispatch)
+                    dispatch(getLeadsContent())
+                } catch (error) {
+                    setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
+                } finally {
+                    setLoading(false) // Remettre loading sur false après les appels asynchrones
+                }
+
             }else{
                 return setErrorMessage("Constructeur non validé")
             }
-            
+
             
             // let newLeadObj = {
             //     "id": 1,

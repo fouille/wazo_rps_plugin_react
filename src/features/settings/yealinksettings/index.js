@@ -1,4 +1,3 @@
-import moment from "moment"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import TitleCard from "../../../components/Cards/TitleCard"
@@ -36,7 +35,7 @@ function YealinkSettings(){
             concernedObj.b64 = btoa(`${yealinkFormObj.id}:${yealinkFormObj.secret}`);
             //on supprimer le token existant si Disabled
             (yealinkFormObj.enabled === false) ? concernedObj.token = "" : console.log(true);
-            ;
+            
             localStorage.setItem('wazo_plugin_rps', JSON.stringify(getObjYealink))
         } else {
             dispatch(SetLocalStorage())

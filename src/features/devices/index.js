@@ -51,14 +51,19 @@ function Devices(){
         }
     }, [isTokenRefreshing, dispatch]);
 
-    const deleteCurrentLead = (index) => {    
+    const deleteCurrentLead = (leadsToDelete) => {
+        console.log("deleteCurrentLead", leadsToDelete);
         
-
-        console.log("delecurrent", index);
-        
-        dispatch(openModal({title : "Confirmation", bodyType : MODAL_BODY_TYPES.CONFIRMATION, 
-        extraObject : { message : `Are you sure you want to delete this ?`, type : CONFIRMATION_MODAL_CLOSE_TYPES.LEAD_DELETE, index}}))
-    }
+        dispatch(openModal({
+            title: "Confirmation",
+            bodyType: MODAL_BODY_TYPES.CONFIRMATION,
+            extraObject: {
+                message: `Are you sure you want to delete these leads?`,
+                type: CONFIRMATION_MODAL_CLOSE_TYPES.LEAD_DELETE,
+                leadsToDelete
+            }
+        }));
+    };
 
     const handleCheckBoxChange = (id, { value }) => {
         console.log(value);
@@ -70,17 +75,15 @@ function Devices(){
 
     const handleDelete = () => {
         const checkedIds = Object.keys(checkedItems).filter(id => checkedItems[id]);
-        console.log("Checked IDs to delete:", checkedIds);
-        const payload = checkedIds.join(',');
-        // console.log("Payload to send:", checkedIds);
+        // console.log("Checked IDs to delete:", checkedIds);
         
-        deleteCurrentLead(checkedIds)
-
-        // Envoyer la liste des IDs cochés pour suppression
-        // Par exemple, vous pouvez appeler une action Redux pour supprimer les éléments
-        // checkedIds.forEach(id => {
-        //     dispatch(deleteLead(id));
-        // });
+        const leadsToDelete = leads.filter(lead => checkedIds.includes(lead.id.toString())).map(lead => ({
+            id: lead.id,
+            brand: lead.brand,
+            id_wazo: lead.id_wazo
+        }));
+        
+        deleteCurrentLead(leadsToDelete);
     };
 
     const isDeleteEnabled = Object.values(checkedItems).some(isChecked => isChecked);
@@ -96,6 +99,7 @@ function Devices(){
                     <thead>
                     <tr>
                         <th>Mac</th>
+                        {/* <th>Dans Tenant</th> */}
                         <th>Constructeur</th>
                         <th>Created At</th>
                         <th>Bound</th>
@@ -115,11 +119,12 @@ function Devices(){
                                     <td>
                                         <div className="font-bold">{macFormatted}</div>
                                     </td>
+                                    {/* <td>{(l.existInTenant === undefined)?"N/A":(l.existInTenant)?<div className="badge badge-success">Oui</div>:<div className="badge badge-error">Non</div>}</td> */}
                                     <td>{(l.brand)?l.brand:""}</td>
                                     <td>{moment(l.dateRegistered).format("DD MMM YY")}</td>
                                     <td>{(l.lastConnected)?<div className="badge badge-success">{moment(l.dateRegistered).format("DD MMM YY | hh:mm:ss")}</div> : <div className="badge badge-warning">Jamais vu</div>}</td>
                                     <td>{l.serverUrl ? l.serverUrl : l.uniqueServerUrl}</td>
-                                    <td><button disabled={(l.button)? l.button:""} className="btn btn-square btn-ghost" onClick={() => deleteCurrentLead(l.id)}><TrashIcon className="w-5"/></button></td>
+                                    <td><button disabled={(l.button)? l.button:""} className="btn btn-square btn-ghost" onClick={() => deleteCurrentLead([{"id": l.id, "brand": l.brand, "id_wazo": l.id_wazo}])}><TrashIcon className="w-5"/></button></td>
                                     <td><CheckBox updateType={l.id} defaultValue={checkedItems[l.id]} updateFormValue={(e) => handleCheckBoxChange(l.id, e)} /></td>
                                     </tr>
                                 )

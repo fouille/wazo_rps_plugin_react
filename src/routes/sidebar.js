@@ -111,6 +111,11 @@ const routes = [
         path: '/app/settings-yealink', // url
         icon: <UserIcon className={submenuIconClasses}/>, // icon component
         name: 'Yealink', // name that appear in Sidebar
+      },
+      {
+        path: '/app/settings-wazo', // url
+        icon: <UserIcon className={submenuIconClasses}/>, // icon component
+        name: 'Wazo', // name that appear in Sidebar
       }
     ]
   },

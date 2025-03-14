@@ -5,7 +5,8 @@ const baseStructure = {
             secret : "",
             enabled : false,
             b64 : "",
-            token : ""
+            token : "",
+            selectedServer : ""
         },
         fanvil : {
             b64 : "",
@@ -30,15 +31,32 @@ const baseStructure = {
         }
     },
     global : {
-        stackProvURL : "",
         stackDomain : "",
         stackToken : "",
-        stackTenantUUID : ""
-
+        stackTenantUUID : "",
+        stackProvSettings : {
+            stackProvURL : "",
+            stackProvHTTPS : "",
+            enabled_https : false,
+            customProv : {
+                enabledCustom : false,
+                stackCustomProvURL : "",
+                stackCustomProvHTTPS : "",
+                enabledCustom_https : false
+            }
+        }
     }
 }
 
 function mergeObjects(base, target) {
+    // Supprimer les clés supplémentaires dans target
+    for (const key in target) {
+        if (target.hasOwnProperty(key) && !base.hasOwnProperty(key)) {
+            delete target[key];
+        }
+    }
+
+    // Ajouter ou mettre à jour les clés manquantes ou différentes dans target
     for (const key in base) {
         if (base.hasOwnProperty(key)) {
             if (typeof base[key] === 'object' && base[key] !== null) {
@@ -61,11 +79,12 @@ async function updateObjStack(objects, context) {
     const userTokenStack = context.app.extra.stack.session.token;
     const userTenantIdStack = context.app.extra.tenant;
 
-    // Merge baseStructure with objects to ensure all keys are present
+    // Fusionner baseStructure avec les objets pour s'assurer que toutes les clés sont présentes, supprime aussi  si une ancienne clé est en trop.
     mergeObjects(baseStructure, objects);
 
     objects.global.stackDomain = domainStack
-    objects.global.stackProvURL = domainStackProv
+    objects.global.stackProvSettings.stackProvURL = domainStackProv
+    objects.global.stackProvSettings.stackProvHTTPS = domainStack + "/device/provisioning/"
     objects.global.stackToken = userTokenStack
     objects.global.stackTenantUUID = userTenantIdStack
     localStorage.setItem("wazo_plugin_rps", JSON.stringify(objects))

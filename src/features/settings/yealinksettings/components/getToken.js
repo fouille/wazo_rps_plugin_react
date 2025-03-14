@@ -26,7 +26,7 @@ export const YealinkGetToken = createAsyncThunk('/token/content', async (dispatc
         yealinkCred.settings.yealink.token = response.data.access_token
         localStorage.setItem('wazo_plugin_rps', JSON.stringify(yealinkCred))
         dispatch(showNotification({message : "Token rafraichis", status : 1}))
-        dispatch(setTokenRefreshing(true))
+        // dispatch(setTokenRefreshing(true))
     })
     .catch((error) => {
       console.log("ERREUR YPD0005: " + error.message)
@@ -36,7 +36,7 @@ export const YealinkGetToken = createAsyncThunk('/token/content', async (dispatc
           
       } else {
           console.log(error);
-          throw error;
+          // throw error;
       }
     });
 });
