@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import InputText from '../../../components/Input/InputText'
+import TextAreaInput from "../../../components/Input/TextAreaInput"
 import SelectBox from '../../../components/Input/SelectBox'
 import ErrorText from '../../../components/Typography/ErrorText'
-import { formatMacAddress } from '../../../components/Functions/outils'
+import { formatMacAddress, stackServerProvdURL, transformData } from '../../../components/Functions/outils'
 import { YealinkPostDevice } from "../../settings/yealinksettings/components/postDevices"
 import { wazoCreateDevice } from "../../settings/wazosettings/WazoCallFunction"
 import { parseBrands } from "../../../components/Functions/parseBrands"
-import { stackServerProvdURL } from "../../../components/Functions/outils"
-import { transformData } from "../../../components/Functions/outils"
 import { getLeadsContent } from "../leadSlice"
+import { setLoading } from "../../common/loadingSlice"
+import { openModal } from "../../common/modalSlice"
+import { MODAL_BODY_TYPES } from "../../../utils/globalConstantUtil"
+import { showNotification } from "../../common/headerSlice"
 
 const INITIAL_LEAD_OBJ = {
     brands : [],
@@ -26,7 +29,7 @@ function AddLeadModalBody({closeModal}){
     INITIAL_LEAD_OBJ.uniqueServerUrl = stackServerProvdURL(dataStorage)
     INITIAL_LEAD_OBJ.brands = brands
     ////
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
     const [leadObj, setLeadObj] = useState(INITIAL_LEAD_OBJ)
 
@@ -35,6 +38,7 @@ function AddLeadModalBody({closeModal}){
         else if(leadObj.uniqueServerUrl.trim() === "")return setErrorMessage("URL is required!")
         else if(leadObj.brand.trim() === "")return setErrorMessage("Constructeur requis!")
         else{
+            closeModal()
             const sendDeviceInfo = {
                 mac: formatMacAddress(leadObj.mac),
                 uniqueServerUrl: leadObj.uniqueServerUrl,
@@ -47,31 +51,34 @@ function AddLeadModalBody({closeModal}){
             if (leadObj.brand === "yealink") {
                 console.log(sendDeviceInfo);
                 const devices = transformData(sendDeviceInfo)
-                setLoading(true) // Définir loading sur true avant les appels asynchrones
+                dispatch(setLoading(true)) // Définir loading sur true avant les appels asynchrones
+                
                 try {
-                    await YealinkPostDevice(devices, dispatch)
-                    await wazoCreateDevice(devices, dispatch)
-                    dispatch(getLeadsContent())
+                    const ycd = await YealinkPostDevice(devices, dispatch)
+                    dispatch(showNotification({message : "Création des appareils Dans Wazo en cours...", status : 1}));
+                    const wcd = await wazoCreateDevice(devices, dispatch, setLoading)
+                    dispatch(showNotification({message : "Création des appareils Dans Wazo Terminé", status : 1}));
+                    const combinedResults = [...ycd, ...wcd];
+                    if (combinedResults.length > 0) {
+                        dispatch(openModal({
+                            title: "Erreur.s lors de l'ajout",
+                            bodyType: MODAL_BODY_TYPES.ERROR,
+                            size : 'lg',
+                            extraObject: { errors: combinedResults }
+                        }));
+                    }
+                    
+                    // dispatch(getLeadsContent())
                 } catch (error) {
                     setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
                 } finally {
-                    setLoading(false) // Remettre loading sur false après les appels asynchrones
+                    dispatch(getLeadsContent())
                 }
 
             }else{
                 return setErrorMessage("Constructeur non validé")
             }
-
             
-            // let newLeadObj = {
-            //     "id": 1,
-            //     "mac": leadObj.mac,
-            //     "uniqueServerUrl": leadObj.uniqueServerUrl,
-            //     "brand": leadObj.brand,
-            //     "button": "disabled"
-            // }
-            // dispatch(addNewLead({newLeadObj}))
-            closeModal()
         }
     }
 
@@ -83,7 +90,7 @@ function AddLeadModalBody({closeModal}){
     return(
         <>
 
-            <InputText type="text" defaultValue={leadObj.mac} updateType="mac" containerStyle="mt-4" labelTitle="Adresse MAC" updateFormValue={updateFormValue}/>
+            <TextAreaInput type="text" defaultValue={leadObj.mac} updateType="mac" containerStyle="mt-4" labelTitle="Adresse MAC" labelDescription="Pour un import de masse, les séparateurs espace, virgule et point-virgule sont acceptés" updateFormValue={updateFormValue}/>
 
             <InputText type="text" defaultValue={leadObj.uniqueServerUrl} updateType="uniqueServerUrl" containerStyle="mt-4" labelTitle="URL" updateFormValue={updateFormValue}/>
 

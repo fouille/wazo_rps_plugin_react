@@ -1,6 +1,6 @@
 import axios from "axios";
-import { showNotification } from "../../common/headerSlice";
-import { convertMacFormat } from "../../../components/Functions/outils";
+import { convertMacFormat, LoadingInterface } from "../../../components/Functions/outils";
+
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -21,14 +21,11 @@ export async function wazoListDevices (dispatch) {
     const response = await axios.request(config)
     .then((data) => {
         const items = data.data.items
-        dispatch(showNotification({message : "Wazo en cours", status : 1}));
         //on recupère et on ne convertis qu'uniquement les mac address
         const results = items.map(obj => ({
             mac: convertMacFormat(obj.mac),
             id: obj.id
         }));
-        // console.log("RETOUR WAZO : ", results);
-        
         return results;
     })
     .catch((error) => {
@@ -39,8 +36,8 @@ export async function wazoListDevices (dispatch) {
     return response;
 };
 
-export async function wazoCreateDevice (devices, dispatch ) {
-    console.log("Wazo MAC Envoyée : ", devices);
+export async function wazoCreateDevice (devices ) {
+    const retour = []
     for (const device of devices.for_brands) {
         const config = {
             method: 'post',
@@ -56,23 +53,24 @@ export async function wazoCreateDevice (devices, dispatch ) {
                 "description" : "Added by Wazo EUC RPS Plugin"
             })
         };
-        const response = await axios.request(config)
-        .then((response) => {
-            console.log(response.data);
-            dispatch(showNotification({message : `Wazo ${device.mac} Ok!`, status : 1}))
-        })
-        .catch((error) => {
-            console.log(error);
+        try {
+            await axios.request(config);
+        } catch (error) {
             if (error.status === 401) {
-                dispatch(showNotification({message : "Wazo : " + error.response.statusText, status : 0}))
+                console.log( "Wazo : " + error.response.statusText);
+                
             } else if (error.status === 400) {
-                dispatch(showNotification({message : "Wazo : " + error.response.data[0], status : 0}))
+                retour.push({
+                    "source": "Wazo",
+                    "mac": device.mac,
+                    "message": error.response.data[0]
+                });
             } else {
                 console.log(error);
             }
-        });
-        await delay(1000);
+        }
     }
+    return retour
 };
 
 async function wazoResetDevice (device) {
@@ -88,23 +86,29 @@ async function wazoResetDevice (device) {
             'Wazo-Tenant': `${wazoData.global.stackTenantUUID}`
         }
     };
-
-    await axios.request(config)
-        .then((data) => {
-            console.log("RETOUR WAZO RESET: ", data);
-        })
-        .catch((error) => {
-            console.log(error);
-        })
+    try {
+        await axios.request(config)
+    } catch (error) {
+        console.log(error);
+    }
 };
 
-export async function wazoDelDevice (devices, dispatch) {
+export async function wazoDelDevice (devices) {
     const wazoData = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-
+    // dispatch(showNotification({message : "Suppression des appareils Wazo en cours...", status : 1}));
+    // setLoading(true)
+    // LoadingInterface(true)
+    const retour = [];
     for (const device of devices) {
+        // exemple structure des elements parsés dans device :
+        // {   
+        //     id_wazo: "da6983d092aa4ad6877fa61c139a2337"
+        //     mac: "3a1565bbb1a8"
+        // }
+        
         let config = {
             method: 'DELETE',
-            url: wazoData.global.stackDomain + '/api/confd/1.1/devices/' + device,
+            url: wazoData.global.stackDomain + '/api/confd/1.1/devices/' + device.id_wazo,
             headers: { 
                 'accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -112,18 +116,24 @@ export async function wazoDelDevice (devices, dispatch) {
                 'Wazo-Tenant': `${wazoData.global.stackTenantUUID}`
             }
         };
-        dispatch(showNotification({message : `Wazo ${device} en cours`, status : 1}));
-        await wazoResetDevice(device)
-        await axios.request(config)
-            .then((data) => {
-                dispatch(showNotification({message : "ok", status : 1}));
-                console.log("RETOUR WAZO DELETE: ", data);
-            })
-            .catch((error) => {
-                dispatch(showNotification({message : device, status : 0}));
-                console.log(error);
-            })
+        // dispatch(showNotification({message : `Wazo ${device} en cours`, status : 1}));
+        try {
+            await wazoResetDevice(device.id_wazo);
+            await axios.request(config);
+        } catch (error) {
+            // showNotification({message : `Erreur lors de la suppression de l'appareil ${device}`, status : 0});
+            retour.push({
+                "source": "Wazo",
+                "mac": device.mac,
+                "message": error.message
+            });
+        }
 
-        await delay(500); // Pause de 1 seconde
+        // await delay(200); // Pause 
     }
+
+    // dispatch(showNotification({message : "Suppression des appareils Wazo terminée", status : 1}));
+    // setLoading(false)
+    // LoadingInterface(false)
+    return retour
 };

@@ -53,7 +53,7 @@ const checkAuth = async () => {
     }else{
         axios.interceptors.request.use(function (config) {
             // UPDATE: Add this code to show global loading indicator
-            document.body.classList.add('loading-indicator');
+            // document.body.classList.add('loading-indicator');
             return config
           }, function (error) {
             return Promise.reject(error);
@@ -61,10 +61,10 @@ const checkAuth = async () => {
           
         axios.interceptors.response.use(function (response) {
             // UPDATE: Add this code to hide global loading indicator
-            document.body.classList.remove('loading-indicator');
+            // document.body.classList.remove('loading-indicator');
             return response;
           }, function (error) {
-            document.body.classList.remove('loading-indicator');
+            // document.body.classList.remove('loading-indicator');
             return Promise.reject(error);
         });
         //ici on initialise le localstorage si pas d'échec dinitialisation ou de droits conforme

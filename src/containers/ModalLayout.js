@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { closeModal } from '../features/common/modalSlice'
 import AddLeadModalBody from '../features/devices/components/AddLeadModalBody'
 import ConfirmationModalBody from '../features/common/components/ConfirmationModalBody'
+import AddWazoModalBody from '../features/settings/wazosettings/components/AddWazoModalBody'
 
 
 function ModalLayout(){
@@ -34,6 +35,7 @@ function ModalLayout(){
                     {
                              [MODAL_BODY_TYPES.LEAD_ADD_NEW] : <AddLeadModalBody closeModal={close} extraObject={extraObject}/>,
                              [MODAL_BODY_TYPES.CONFIRMATION] : <ConfirmationModalBody extraObject={extraObject} closeModal={close}/>,
+                             [MODAL_BODY_TYPES.ERROR] : <AddWazoModalBody extraObject={extraObject} closeModal={close}/>,
                              [MODAL_BODY_TYPES.DEFAULT] : <div></div>
                     }[bodyType]
                 }

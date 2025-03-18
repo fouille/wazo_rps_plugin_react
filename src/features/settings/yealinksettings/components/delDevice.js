@@ -4,6 +4,8 @@ import { randomString } from '../../../../components/Functions/outils';
 import { YealinkGetToken } from './getToken';
 
 export const YealinkDelDevice = async (devices, dispatch) => {
+    // console.log("YL DEL DEVICES DATA", devices);
+    
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     const config = {
         method: 'post',
@@ -16,33 +18,57 @@ export const YealinkDelDevice = async (devices, dispatch) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${storage.settings.yealink.token}`,
         },
-        data: JSON.stringify(devices),
+        data: JSON.stringify({ deviceIds: devices.map(device => device.deviceIds) }),
         mode: 'cors'
     };
     const response = await axios.request(config)
         .then((response) => {
-            console.log(response);
 
             if (response.data.failureCount > 0) {
-                dispatch(showNotification({ message: response.errors[0].msg, status: 0 }))
+                
+                const transformedData = response.data.errors.map(item => {
+                    const device = devices.find(device => device.deviceIds === item.field);
+                    return {
+                        source: "Yealink",
+                        mac: device ? device.mac : "N/A",
+                        message: item.msg
+                    };
+                });
+                // console.log("YEALINK DEL DEVICE RETURN", transformedData);
+                
+                return transformedData
+               
             }
             if (response.data.successCount > 0) {
-                dispatch(showNotification({ message: "Supprimé.s du RPS", status: 1 }))
+                return []
+            }
+
+            else {
+                return []
             }
 
         })
-        .catch(async (error) => {
+        .catch(async (error, dispatch) => {
             console.log("ERREUR YDD0001: " + error)
             if (error.status === 401) {
-                
-                dispatch(showNotification({message : "Rafraîchissement du token en cours", status : 1}))
 
                 await dispatch(YealinkGetToken(dispatch))
                 
                 await YealinkDelDevice(devices, dispatch)
                 
-            } else {
+            } 
+            if (error.status === 412) {
+                const retour = [{
+                    source: "Yealink",
+                    mac: "N/A",
+                    message: error.message
+                }]
+                return retour
+            }
+            else {
                 console.log(error);
             }
         });
+
+        return response
 };

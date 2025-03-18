@@ -70,3 +70,8 @@ export const stackServerProvdURL = (getStorage) => {
     }
   }
 }
+
+//affichage forcé du loading
+export const LoadingInterface = (usage) => {
+  return usage ? document.body.classList.add('loading-indicator') : document.body.classList.remove('loading-indicator');
+}
