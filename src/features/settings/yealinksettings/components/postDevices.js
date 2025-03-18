@@ -5,12 +5,7 @@ import { YealinkGetToken } from './getToken'
 
 export async function YealinkPostDevice (transformedData, dispatch) {
     const yealinkToken = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-
-    // Transformation des données
-    // const transformedData = transformData(_)
-    // const transformedData = ""
-    console.log(transformedData);
-    
+    dispatch(showNotification({message : "Enregistrement RPS en cours", status : 1}));
     const config = {
         method: 'post',
         maxBodyLength: Infinity,
@@ -30,26 +25,22 @@ export async function YealinkPostDevice (transformedData, dispatch) {
 
     const response =  await axios.request(config)
         .then(async (response) => {
-            
-            console.log("Response from Yealink:", response.data);
-            if(response.data.failureCount > 0) { 
-                response.data.errors.forEach(async (error, index) => {
-                    await delay(100);
-                    dispatch(showNotification({message : `Mac ${error.mac} : ${error.errorInfo}`, status : 0}));
+            if(response.data.failureCount > 0) {
+                const transformedData = response.data.errors.map(item => {
+                    return {
+                        source: "Yealink",
+                        mac: item.mac ? item.mac : "N/A",
+                        message: item.errorInfo
+                    };
                 });
+                
+                return transformedData
             }
-            
-            // if (response.data.successCount > 0) {
-            //     await delay(100);
-            //     dispatch(showNotification({message : `Yealink RPS Ok!`, status : 1}));
-            // }
-
             await delay(100)
-            dispatch(showNotification({message : `RPS : ${response.data.successCount}/${response.data.total} created`, status : 1}));
-            
-            
+            dispatch(showNotification({message : `RPS : ${response.data.successCount}/${response.data.total} créé.s`, status : 1}));
+            return []
         })
-        .catch(async (error) => {
+        .catch(async (error, dispatch) => {
         console.log("ERREUR YPD0004: " + error)
             if (error.status === 401) {
                 console.log('Token expired');
@@ -65,8 +56,13 @@ export async function YealinkPostDevice (transformedData, dispatch) {
                 
             } else {
                 console.log(error);
-                throw error;
+                const retour = [{
+                    source: "Yealink",
+                    mac: "N/A",
+                    message: error.message
+                }]
+                return retour
             }
         });
-    return response;
+    return response
 }

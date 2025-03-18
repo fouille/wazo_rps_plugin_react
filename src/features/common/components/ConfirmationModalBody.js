@@ -1,85 +1,82 @@
 
 import React, { useState, useEffect } from "react";
 import { useDispatch } from 'react-redux'
-import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_CLOSE_TYPES } from '../../../utils/globalConstantUtil'
+import { openModal } from "../modalSlice";
+import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../../utils/globalConstantUtil'
 import { YealinkDelDevice } from "../../settings/yealinksettings/components/delDevice";
 import { wazoDelDevice } from "../../settings/wazosettings/WazoCallFunction";
 import { showNotification } from '../headerSlice'
 import { getLeadsContent } from '../../devices/leadSlice'
+import { LoadingInterface } from "../../../components/Functions/outils";
+import { setLoading } from "../loadingSlice";
 
 function ConfirmationModalBody({ extraObject, closeModal}){
 
     const dispatch = useDispatch()
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const { message, type, _id, leadsToDelete} = extraObject
+    const { message, type, _id, cleanedLeadsToDelete } = extraObject
 
     const proceedWithYes = async() => {
-        setLoading(true) // Définir loading sur true avant les appels asynchrones
+        // setLoading(true) // Définir loading sur true avant les appels asynchrones
+        dispatch(setLoading(true));
+        // LoadingInterface(true)
         try {
             if(type === CONFIRMATION_MODAL_CLOSE_TYPES.LEAD_DELETE){
-                console.log("modal", leadsToDelete);
-                
-
 
                 // Regrouper les leads par brand
-                const groupedLeads = leadsToDelete.reduce((acc, lead) => {
-                    let { brand, id, id_wazo } = lead;
+                const groupedLeads = cleanedLeadsToDelete.reduce((acc, lead) => {
+                    let { brand, id, id_wazo, mac } = lead;
                     //pour raison d'affichage dans le tableau la première lettre est en majuscule, 
                     // ici on la met en minuscule
                     brand = brand.charAt(0).toLowerCase() + brand.slice(1);
                     if (!acc[brand]) {
                         acc[brand] = [];
                     }
-                    acc[brand].push({ id, id_wazo });
+                    acc[brand].push({ id, id_wazo, mac, key: id }); // Ajout de la clé unique ici
                     return acc;
                 }, {});
-                console.log(groupedLeads);
                 
-
                 //ici on match avec les brand parsées au dessus, pour faire les actions API par rapport aux brands
                 // Itérer sur chaque clé de l'objet groupedLeads
-                Object.keys(groupedLeads).forEach(async brand => {
+                closeModal()
+                for (const brand of Object.keys(groupedLeads)) {
                     if (brand === "yealink") {
-                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}))
-                        console.log("données de yealink :", groupedLeads[brand]);
-                        console.log("IDs de yealink :", groupedLeads[brand].map(lead => lead.id));
-                        await YealinkDelDevice({"deviceIds": groupedLeads[brand].map(lead => lead.id)}, dispatch)
-                        await wazoDelDevice(groupedLeads[brand].map(lead => lead.id_wazo), dispatch)
-                        dispatch(getLeadsContent());
-                        // Ajoutez ici l'appel API pour yealink si nécessaire
+                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}));
+                        dispatch(showNotification({message : "Suppression des appareils Yealink RPS", status : 1}));
+                        const ydd = await YealinkDelDevice(groupedLeads[brand].map(lead => ({ deviceIds: lead.id, mac: lead.mac })), dispatch);
+                        dispatch(showNotification({message : "Suppression des appareils Yealink terminé", status : 1}));
+                        dispatch(showNotification({message : "Suppression des appareils Wazo en cours...", status : 1}));
+                        const wdd = await wazoDelDevice(groupedLeads[brand].map(lead => ({ id_wazo: lead.id_wazo, mac: lead.mac })));
+                        dispatch(showNotification({message : "Suppression des appareils Wazo Terminé", status : 1}));
+    
+                        const combinedResults = [...ydd, ...wdd];
+                        if (combinedResults.length > 0) {
+                            dispatch(openModal({
+                                title: "Erreur.s lors de la suppression",
+                                bodyType: MODAL_BODY_TYPES.ERROR,
+                                size: 'lg',
+                                extraObject: { errors: combinedResults }
+                            }));
+                        }
                     }
                     if (brand === "fanvil") {
-                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}))
-                        // Ajoutez ici l'appel API pour fanvil si nécessaire
+                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}));
                     }
                     if (brand === "snom") {
-                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}))
-                        // Ajoutez ici l'appel API pour snom si nécessaire
+                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}));
                     }
                     if (brand === "gigaset") {
-                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}))
-                        // Ajoutez ici l'appel API pour gigaset si nécessaire
+                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}));
                     }
-                });
-
-                // Vérifier si index est un tableau, sinon le transformer en tableau
-                // const array = Array.isArray(index) ? index : [index];
-                // const newArray = {"deviceIds": array};
-                // console.log(newArray);
-                
-                // positive response, call api or dispatch redux function
-                // await YealinkDelDevice(newArray, dispatch)
-                //     .then((data)=>{
-                //         // dispatch(getLeadsContent());
-                //     })
+                }
             }
-            closeModal()
+            
         } catch (error) {
             setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
         } finally {
-            setLoading(false) // Remettre loading sur false après les appels asynchrones
+            dispatch(getLeadsContent());
         }
     }
 
@@ -91,9 +88,9 @@ function ConfirmationModalBody({ extraObject, closeModal}){
 
         <div className="modal-action mt-12">
                 
-                <button className="btn btn-outline   " onClick={() => closeModal()}>Cancel</button>
+                <button className="btn btn-outline   " onClick={() => closeModal()}>Quitter</button>
 
-                <button className="btn btn-primary w-36" onClick={() => proceedWithYes()}>Yes</button> 
+                <button className="btn btn-primary w-36" onClick={() => proceedWithYes()}>Oui</button> 
 
         </div>
         </>

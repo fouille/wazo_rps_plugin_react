@@ -21,7 +21,7 @@ function SelectBox(props){
     return (
         <div className={`inline-block ${containerStyle}`}>
             <label  className={`label  ${labelStyle}`}>
-                <div className="label-text">{labelTitle}
+                <div className="label-text">{labelTitle} 
                 {labelDescription && <div className="tooltip tooltip-right" data-tip={labelDescription}><InformationCircleIcon className='w-4 h-4'/></div>}
                 </div>
             </label>

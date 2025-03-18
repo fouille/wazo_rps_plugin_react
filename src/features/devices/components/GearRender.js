@@ -13,7 +13,7 @@ export function gearRender (wazo, brand, dispatch) {
         customProv: { stackCustomProvURL, stackCustomProvHTTPS }
     } = storage.global.stackProvSettings;
 
-    dispatch(showNotification({message : "Moteur en cours", status : 1}));
+    // dispatch(showNotification({message : "Moteur en cours", status : 1}));
     
     //par simplicité on combine les deux types de filtres
     //le filtre boolean permet de retirer les potentielles valeurs de serveurs vide

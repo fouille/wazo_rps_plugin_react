@@ -21,11 +21,7 @@ export async function yealinkListDevices (dispatch) {
         {
             "skip": 0,
             "limit": 100,
-            "autoCount": true,
-            // "filter" :{
-            //     "serverUrl" : "http://franckprov.wazo.io:8667",
-            //     "uniqueServerUrl" : "http://franckprov.wazo.io:8667"
-            // }
+            "autoCount": true
         },
         {
             headers: headers
@@ -34,7 +30,6 @@ export async function yealinkListDevices (dispatch) {
     .then( (response) => {
         const json = response.data.data
         
-        dispatch(showNotification({message : "Recherche en cours", status : 1}));
         //on ajoute le brand d'origne pour le fournir au moteur de données du tableau
         const result = json.map((l)=>({...l, brand: "Yealink"}))
         // console.log("API Response Data:", json); 
@@ -55,7 +50,12 @@ export async function yealinkListDevices (dispatch) {
             const result = await yealinkListDevices(dispatch)
             return result
 
-        } else {
+        } 
+        if (error.status === 504) {
+            dispatch(showNotification({message : error.message, status : 0}));
+        }
+        
+        else {
             console.log(error);
             // throw error;
         } 
