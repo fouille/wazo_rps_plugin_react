@@ -1,8 +1,8 @@
 import CircleStackIcon  from '@heroicons/react/24/outline/CircleStackIcon'
 
-function DashboardStats({title, value, description, colorIndex}){
+function DashboardRpsStats({title, value, description, colorIndex}){
 
-    const COLORS = ["primary", "secondary"]
+    const COLORS = ["green-600", "secondary"]
 
     const getDescStyle = () => {
         if(description.includes("↗︎"))return "font-bold text-green-700 dark:text-green-300"
@@ -22,4 +22,4 @@ function DashboardStats({title, value, description, colorIndex}){
     )
 }
 
-export default DashboardStats
+export default DashboardRpsStats

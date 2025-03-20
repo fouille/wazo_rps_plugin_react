@@ -1,59 +1,17 @@
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Filler,
-//   Legend,
-// } from 'chart.js';
-// import { Line } from 'react-chartjs-2';
 import TitleCard from '../../../components/Cards/TitleCard';
-
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Filler,
-//   Legend
-// );
+const Text = ({ children }) => <span>{children}</span>
 
 function Panel1(){
-
-//   const options = {
-//     responsive: true,
-//     plugins: {
-//       legend: {
-//         position: 'top',
-//       },
-//     },
-//   };
-
-  
-//   const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-
-//   const data = {
-//   labels,
-//   datasets: [
-//     {
-//       fill: true,
-//       label: 'MAU',
-//       data: labels.map(() => { return Math.random() * 100 + 500 }),
-//       borderColor: 'rgb(53, 162, 235)',
-//       backgroundColor: 'rgba(53, 162, 235, 0.5)',
-//     },
-//   ],
-// };
-  
-
     return(
-      <TitleCard title={"Qu'est-ce ?"}>
-          Le plugin RPS de Wazo vous permets de créer un poste par son adresse mac et de le lier à un serveur RPS.
+      <TitleCard titleClass={"text-primary"} title={"Bienvenue sur le plugin RPS by Wazo"}>
+      <Text>
+        Ce plugin vous permets : <br />
+        <br />
+        <li class="ml-5">D'activer ou de désactiver des Serveurs RPS</li>
+        <li class="ml-5">D'ajouter des périphériques à un serveur RPS et à votre site Wazo</li>
+        <li class="ml-5">De supprimer des périphériques d'un serveur RPS et de votre site Wazo</li>
+        <li class="ml-5">De réaliser des ajouts et des suppressions en masse</li>
+      </Text>
       </TitleCard>
     )
 }

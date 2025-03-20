@@ -1,4 +1,4 @@
-import TemplatePointers from "./components/TemplatePointers"
+// import TemplatePointers from "./components/TemplatePointers"
 
 
 

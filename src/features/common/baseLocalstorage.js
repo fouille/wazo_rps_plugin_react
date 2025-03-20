@@ -5,8 +5,7 @@ const baseStructure = {
             secret : "",
             enabled : false,
             b64 : "",
-            token : "",
-            selectedServer : ""
+            token : ""
         },
         fanvil : {
             b64 : "",

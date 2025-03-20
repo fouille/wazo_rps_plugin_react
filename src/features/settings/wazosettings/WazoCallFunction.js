@@ -1,5 +1,5 @@
 import axios from "axios";
-import { convertMacFormat, LoadingInterface } from "../../../components/Functions/outils";
+import { convertMacFormat, LoadingInterface, formatMacAddressString } from "../../../components/Functions/outils";
 
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -124,7 +124,7 @@ export async function wazoDelDevice (devices) {
             // showNotification({message : `Erreur lors de la suppression de l'appareil ${device}`, status : 0});
             retour.push({
                 "source": "Wazo",
-                "mac": device.mac,
+                "mac": formatMacAddressString(device.mac),
                 "message": error.message
             });
         }

@@ -51,13 +51,25 @@ function ConfirmationModalBody({ extraObject, closeModal}){
                         const wdd = await wazoDelDevice(groupedLeads[brand].map(lead => ({ id_wazo: lead.id_wazo, mac: lead.mac })));
                         dispatch(showNotification({message : "Suppression des appareils Wazo Terminé", status : 1}));
     
-                        const combinedResults = [...ydd, ...wdd];
-                        if (combinedResults.length > 0) {
+
+                        const combinedResults = [...ydd, ...wdd].sort((a, b) => a.mac.localeCompare(b.mac))
+                        // Transformer les résultats pour masquer la deuxième clé MAC si elle est identique à la précédente
+                        // Cela permet de ne pas afficher la même erreur pour chaque appareil sur le modal d'erreur
+                        const transformedResults = combinedResults.map((result, index, array) => {
+                            if (index > 0 && result.mac === array[index - 1].mac) {
+                                return {
+                                    ...result,
+                                    mac: ""
+                                };
+                            }
+                            return result;
+                        });
+                        if (transformedResults.length > 0) {
                             dispatch(openModal({
                                 title: "Erreur.s lors de la suppression",
                                 bodyType: MODAL_BODY_TYPES.ERROR,
                                 size: 'lg',
-                                extraObject: { errors: combinedResults }
+                                extraObject: { errors: transformedResults }
                             }));
                         }
                     }

@@ -11,10 +11,27 @@ export const randomString = (length=1) => {
 // convertisseur de mac address au format sans ":" (utiliser pour reformater les macs en provenance de Wazo)
 export const convertMacFormat = (mac) => mac.replace(/:/g, '');
 
+// convertisseur de mac address au format xx:xx:xx:xx:xx retourne mac/mac
+export const formatMacAddressString = (macs) => {
+  // Split the input string by commas, spaces, or semicolons to get individual MAC addresses
+  const macArray = macs.split(/[,;]\s*/);
+
+  // Process each MAC address
+  const formattedMacs = macArray.map(mac => {
+    // Remove all non-alphanumeric characters
+    const cleanedMac = mac.replace(/[^a-fA-F0-9]/g, '').toLowerCase();
+    // Add colons every two characters
+    return cleanedMac.match(/.{1,2}/g).join(':');
+  });
+
+  // Join the formatted MAC addresses into a single string separated by commas
+  return formattedMacs.join(',');
+};
+
 //formateur de mac address au format xx:xx:xx:xx:xx retourne sous forme de tableau
 export const formatMacAddress = (macs) => {
   // Split the input string by commas, spaces, or semicolons to get individual MAC addresses
-  const macArray = macs.split(/[,;]\s*/);
+  const macArray = macs.split(/[,;\s\n]+/).filter(mac => mac);
 
   // Process each MAC address
   return macArray.map(mac => {
@@ -33,7 +50,8 @@ export const transformData = (data) => {
     for_brands.push({
       brand: data.brand,
       mac: data.mac[i],
-      uniqueServerUrl: data.uniqueServerUrl
+      uniqueServerUrl: data.uniqueServerUrl,
+      serverId: data.serverId
     });
   }
 

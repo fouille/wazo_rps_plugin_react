@@ -42,7 +42,8 @@ export function gearRender (wazo, brand, dispatch) {
         const wazoItem = wazo.find(w => w.mac === l.mac);
         return { ...l, id_wazo: wazoItem ? wazoItem.id : null };
     });
-        
+    // console.log("Filtered Data:", filteredData);
+    
     return filteredData
 
 }

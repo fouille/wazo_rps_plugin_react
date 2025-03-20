@@ -9,7 +9,7 @@ import moment from "moment"
 import { setLoading } from "../common/loadingSlice";
 import TitleCard from "../../components/Cards/TitleCard"
 import { openModal } from "../common/modalSlice"
-import { deleteLead, getLeadsContent, setTokenRefreshing } from "./leadSlice"
+import { getLeadsContent, setTokenRefreshing } from "./leadSlice"
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
 import { parseBrands } from "../../components/Functions/parseBrands"
 
@@ -71,23 +71,12 @@ function Devices(){
     useEffect(() => {
         // console.log("Dispatch getLeadsContent...");
         if (isTokenRefreshing) {
-                // dispatch(getLeadsContent());
-                // fetchLeadsContent();
                 dispatch(setTokenRefreshing(false));
         } else {
-            console.log("DATATABLE GET DISPATCH");
-            
             fetchLeadsContent();
         }
     }, [isTokenRefreshing, dispatch]);
 
-    // useEffect(() => {
-    //     if (selectedDevices) {
-    //         console.log("Selected Devices:", selectedDevices);
-    //     }
-    // }, [selectedDevices]);
-
-    // Ajoutez cet effet pour surveiller les changements dans leads
     useEffect(() => {
         setDevices(leads);
     }, [leads]);
@@ -97,13 +86,13 @@ function Devices(){
     }, [devices]);
 
     const deleteCurrentLead = (leadsToDelete) => {
-        console.log("deleteCurrentLead", leadsToDelete);
+        // console.log("deleteCurrentLead", leadsToDelete);
 
         const cleanedLeadsToDelete = leadsToDelete.map(lead => {
             const { dateRegistered, ipAddress, lastConnected, remark, serverId, serverName, serverUrl, sn, uniqueServerUrl, ...rest } = lead; // Remplacez key1, key2 par les clés que vous souhaitez supprimer
             return rest;
          });
-         console.log("clean : ", cleanedLeadsToDelete);
+        //  console.log("clean : ", cleanedLeadsToDelete);
          
         dispatch(openModal({
             title: "Confirmation",
@@ -137,6 +126,9 @@ function Devices(){
         }
         
     };
+    const getServerUrl = (rowData) => {
+        return rowData.serverUrl || rowData.uniqueServerUrl;
+    };
 
     return(
         <>
@@ -156,9 +148,9 @@ function Devices(){
                             loading={loading}
                             emptyMessage="No devices found."
                             rows={10} 
-                            rowsPerPageOptions={[10, 20, 50, 100]} 
+                            rowsPerPageOptions={[10, 20, 50, 100, 200]} 
                             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                            currentPageReportTemplate="{first} to {last} of {totalRecords}" 
+                            currentPageReportTemplate="{first} à {last} de {totalRecords}" 
                             paginatorLeft={paginatorLeft} 
                             paginatorRight={paginatorRight}
                             selection={selectedDevices} 
@@ -166,11 +158,11 @@ function Devices(){
                             tableStyle={{ minWidth: '50rem' }}
                             >
                     <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
-                    <Column field="mac" header="Mac" body={formatMacAddress} filter filterPlaceholder="Recherche par mac" sortable ></Column>
+                    <Column field="mac" header="Mac" body={formatMacAddress} filter filterPlaceholder="Recherche par mac (fin)" sortable ></Column>
                     <Column field="brand" header="Constructeur" filter filterPlaceholder="Recherche par marque" ></Column>
-                    <Column field="dateRegistered" body={dateRegistered} header="Created At"></Column>
-                    <Column field="lastConnected" body={formatLastConnected} header="Bound"></Column>
-                    <Column field={"uniqueServerUrl" || "serverUrl"} header="URL"></Column>
+                    <Column field="dateRegistered" body={dateRegistered} header="Créé le"></Column>
+                    <Column field="lastConnected" body={formatLastConnected} header="Vu le"></Column>
+                    <Column field="serverUrl" body={getServerUrl} header="URL Provisionning"></Column>
                 </DataTable >
             </div>
             </TitleCard>

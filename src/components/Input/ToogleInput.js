@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 
-function ToogleInput({disabled, labelTitle, labelStyle, type, containerStyle, defaultValue, placeholder, updateFormValue, updateType}){
+function ToogleInput({disabled, labelTitle, toggleStyle, labelStyle, type, containerStyle, defaultValue, placeholder, updateFormValue, updateType}){
 
     const [value, setValue] = useState(defaultValue)
 
@@ -14,7 +14,7 @@ function ToogleInput({disabled, labelTitle, labelStyle, type, containerStyle, de
         <div className={`form-control w-full ${containerStyle}`}>
             <label className="label cursor-pointer">
                 <span className={"label-text text-base-content " + labelStyle}>{labelTitle}</span>
-                <input disabled={disabled} type="checkbox" className="toggle" checked={value}  onChange={(e) => updateToogleValue()}/>
+                <input disabled={disabled} type="checkbox" className={`toggle toggle-${toggleStyle}`} checked={value}  onChange={(e) => updateToogleValue()}/>
             </label>
         </div>
     )

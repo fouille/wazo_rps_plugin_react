@@ -21,8 +21,8 @@ function AddWazoModalBody({ extraObject, closeModal}){
                     <table className="table w-full">
                         <thead>
                         <tr>
-                            <th>Source</th>
                             <th>Mac</th>
+                            <th>Source</th>
                             <th>Erreur</th>
                         </tr>
                         </thead>
@@ -30,14 +30,14 @@ function AddWazoModalBody({ extraObject, closeModal}){
                         {
                             errors.map((l) => {
                                 // let mac = l.mac
-                                let macFormatted = formatMacAddress(l.mac)
+                                let macFormatted = l.mac
 
                                 return(
                                     <tr>
-                                        <td>{l.source}</td>
                                         <td>
                                             <div className="font-bold">{macFormatted}</div>
                                         </td>
+                                        <td>{l.source}</td>
                                         <td>{l.message}</td>
                                     </tr>
                                 )
