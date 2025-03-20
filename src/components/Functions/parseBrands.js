@@ -15,8 +15,8 @@ export const parseBrandsDashboard = (json) => {
         if (json[brand]) {
             result.push({ 
                 title: brand.charAt(0).toUpperCase() + brand.slice(1), 
-                value: (json[brand].enabled)? "Enabled" : "N/A", 
-                description: "", 
+                value: (json[brand].enabled)? "Activé" : "Désactivé", 
+                description: (json[brand].enabled)? "Les périphériques de ce serveur seront listés" : "Aucun périphérique ne sera listé", 
                 colorIndex: (json[brand].enabled)? 0 : 1});
         }
     }

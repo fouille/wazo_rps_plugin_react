@@ -1,44 +1,23 @@
-import DashboardStats from './components/DashboardStats'
-// import AmountStats from './components/AmountStats'
-// import PageStats from './components/PageStats'
-
-// import UserGroupIcon  from '@heroicons/react/24/outline/UserGroupIcon'
-// import UsersIcon  from '@heroicons/react/24/outline/UsersIcon'
-// import CircleStackIcon  from '@heroicons/react/24/outline/CircleStackIcon'
-// import CreditCardIcon  from '@heroicons/react/24/outline/CreditCardIcon'
-// import UserChannels from './components/UserChannels'
+import DashboardRpsStats from './components/DashboardRpsStats'
 import Panel1 from './components/Panel1'
 import Panel2 from './components/Panel2'
 import { parseBrandsDashboard } from '../../components/Functions/parseBrands'
-// import DashboardTopBar from './components/DashboardTopBar'
-// import { useDispatch } from 'react-redux'
-// import {showNotification} from '../common/headerSlice'
-// import DoughnutChart from './components/DoughnutChart'
-// import { useState } from 'react'
 
 
 function Dashboard(){
     const getStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     const getbrands = parseBrandsDashboard(getStorage.settings)
     // const dispatch = useDispatch()
- 
-
-    // const updateDashboardPeriod = (newRange) => {
-    //     // Dashboard range changed, write code to refresh your values
-    //     dispatch(showNotification({message : `Period updated to ${newRange.startDate} to ${newRange.endDate}`, status : 1}))
-    // }
 
     return(
         <>
-        {/** ---------------------- Select Period Content ------------------------- */}
-            {/* <DashboardTopBar updateDashboardPeriod={updateDashboardPeriod}/> */}
         
-        {/** ---------------------- Different stats content 1 ------------------------- */}
+        {/** ---------------------- Affiche les Status dactivation des RPS ------------------------- */}
             <div className="grid lg:grid-cols-4 mt-2 md:grid-cols-2 grid-cols-1 gap-6">
                 {
                     getbrands.map((d, k) => {
                         return (
-                            <DashboardStats key={k} {...d} />
+                            <DashboardRpsStats key={k} {...d} />
                         )
                     })
                 }
@@ -46,25 +25,11 @@ function Dashboard(){
 
 
 
-        {/** ---------------------- Different charts ------------------------- */}
+        {/** ---------------------- Blocs accueil du Dashboard ------------------------- */}
             <div className="grid lg:grid-cols-2 mt-4 grid-cols-1 gap-6">
                 <Panel1 />
                 <Panel2 />
             </div>
-            
-        {/** ---------------------- Different stats content 2 ------------------------- */}
-        
-            {/* <div className="grid lg:grid-cols-2 mt-10 grid-cols-1 gap-6">
-                <AmountStats />
-                <PageStats />
-            </div> */}
-
-        {/** ---------------------- User source channels table  ------------------------- */}
-        
-            {/* <div className="grid lg:grid-cols-2 mt-4 grid-cols-1 gap-6">
-                <UserChannels />
-                <DoughnutChart />
-            </div> */}
         </>
     )
 }

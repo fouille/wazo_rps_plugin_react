@@ -3,63 +3,76 @@ import { randomString } from "../../../../components/Functions/outils"
 import { showNotification } from "../../../common/headerSlice"
 import { YealinkGetToken } from "./getToken"
 
-
-
 export async function yealinkListDevices (dispatch) {
-
     const getStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-    
-    const headers = { 
-        'Access-Control-Allow-Origin': '*',
-        'Nonce': randomString(32),
-        'Timestamp': Date.now(),
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getStorage.settings.yealink.token}`
-    }
 
-    const response = await axios.post('/v2/rps/listDevices', 
-        {
-            "skip": 0,
-            "limit": 100,
-            "autoCount": true
-        },
-        {
-            headers: headers
-        }
-    )
-    .then( (response) => {
-        const json = response.data.data
-        
-        //on ajoute le brand d'origne pour le fournir au moteur de données du tableau
-        const result = json.map((l)=>({...l, brand: "Yealink"}))
-        // console.log("API Response Data:", json); 
-        return result
 
-    })
-    .catch(async (error) => {
-        if (error.status === 401) {
-            console.log('Token expired');
-            console.log('Getting new token');
+    let allData = []
+    let skip = 0
+    const limit = 100
+    let total = 0
+    let hasError = false
+
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+    do {
+        await axios.post('/v2/rps/listDevices', 
+            {
+                "skip": skip,
+                "limit": limit,
+                "autoCount": true
+            },
+            {
+                headers: { 
+                    'Access-Control-Allow-Origin': '*',
+                    'Nonce': randomString(32),
+                    'Timestamp': Date.now(),
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getStorage.settings.yealink.token}`
+                }
+            }
+        )
+        .then((response) => {
+            const json = response.data.data
+            if (total === 0) {
+                total = response.data.total
+            }
             
-            dispatch(showNotification({message : "Rafraîchissement du token en cours", status : 1}));
+            //on ajoute le brand d'origne pour le fournir au moteur de données du tableau
+            const result = json.map((l) => ({ ...l, brand: "Yealink" }))
+            allData = [...allData, ...result]
+            skip += json.length
+            total -= json.length
+        })
+        .catch(async (error) => {
+            hasError = true
+            dispatch(showNotification({ message: "Yealink, il y a eu une erreur dans le Loop - YLD0001", status: 0 }))
+            if (error.response && error.response.status === 401) {
+                console.log('Token expired')
+                console.log('Getting new token')
+                
+                dispatch(showNotification({ message: "Rafraîchissement du token en cours", status: 1 }))
 
-            await dispatch(YealinkGetToken(dispatch))
-            console.log('Token refreshed');
-            console.log('Reloading data');
-            //on reboucle la fonction pour retourner le résultat suite à un rafraichissement de token 
-            const result = await yealinkListDevices(dispatch)
-            return result
+                await dispatch(YealinkGetToken(dispatch))
+                console.log('Token refreshed')
+                console.log('Reloading data')
+                //on reboucle la fonction pour retourner le résultat suite à un rafraichissement de token 
+                const result = await yealinkListDevices(dispatch)
+                return result
 
-        } 
-        if (error.status === 504) {
-            dispatch(showNotification({message : error.message, status : 0}));
-        }
-        
-        else {
-            console.log(error);
-            // throw error;
-        } 
-    })
+            } 
+            if (error.response && error.response.status === 504) {
+                dispatch(showNotification({ message: error.message, status: 0 }))
+            } else {
+                console.log(error)
+                // throw error;
+            } 
+        })
 
-    return response
+        // Ajout d'une pause de 200ms
+        await delay(100)
+
+    } while (total > 0 && !hasError)
+
+    return allData
 }

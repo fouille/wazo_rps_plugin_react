@@ -24,7 +24,7 @@ function GigasetSettings(){
     return(
         <>
             
-            <TitleCard title="Configuration (Non disponible actuellement)" topMargin="mt-2">
+            <TitleCard title="Gigaset | Réglages RPS (Non disponible actuellement)" topMargin="mt-2">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputText disabled labelTitle="AccessKey ID" defaultValue="xxxxxxxxxx" updateFormValue={updateFormValue}/>

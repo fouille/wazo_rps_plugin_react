@@ -53,7 +53,7 @@ function WazoSettings(){
             dispatch(updateProfile())
         }
         
-        dispatch(showNotification({message : "Profile Updated", status : 1}))    
+        dispatch(showNotification({message : "Réglages Wazo mis à jour", status : 1}))    
     }
 
     //ici les éléments updateType sont envoyées sous forme de tableau car nous en avons besoin pour placer les valeurs parsées dans le localstorage
@@ -73,22 +73,30 @@ function WazoSettings(){
     return(
         <>
             
-            <TitleCard title="Profile Settings" topMargin="mt-2">
-
+            <TitleCard title="Wazo | Réglages serveur provisionning" topMargin="mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-10">
+                    Ici les réglages du serveur de provisionning Wazo sont affichés. Vous pouvez activer le provisionning HTTPS par défaut (Ce service doit être activé et installé au préalable sur votre stack).
+                </div>
+            
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputText disabled labelTitle="Default HTTP Server URL" defaultValue={INITIAL_WAZO_OBJ.stackProvURL} updateType={["stackProvURL"]} updateFormValue={updateFormValue}/>
                     <InputText disabled labelTitle="Default HTTPS Server URL" defaultValue={INITIAL_WAZO_OBJ.stackProvHTTPS} updateType={["stackProvHTTPS"]} updateFormValue={updateFormValue}/>
-                    <ToogleInput labelTitle="Activer Provisionning HTTPS par défaut" defaultValue={INITIAL_WAZO_OBJ.enabled_https} updateType={["enabled_https"]} updateFormValue={updateFormValue}/>
+                    <ToogleInput disabled={wazoFormObj.customProv.enabledCustom || wazoFormObj.customProv.enabledCustom_https} toggleStyle={"success"} labelStyle={(wazoFormObj.enabled_https)?"font-bold":""} labelTitle="Activer Provisionning HTTPS par défaut" defaultValue={INITIAL_WAZO_OBJ.enabled_https} updateType={["enabled_https"]} updateFormValue={updateFormValue}/>
                 </div>
                 <div className="divider" ></div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InputText labelTitle="Custom HTTP Server URL" defaultValue={INITIAL_WAZO_OBJ.customProv.stackCustomProvURL} updateType={["customProv", "stackCustomProvURL"]} updateFormValue={updateFormValue}/>
-                    <InputText labelTitle="Custom HTTPS Server URL" defaultValue={INITIAL_WAZO_OBJ.customProv.stackCustomProvHTTPS} updateType={["customProv", "stackCustomProvHTTPS"]} updateFormValue={updateFormValue}/>
-                    <ToogleInput labelTitle="Activer Provisionning Custom" defaultValue={INITIAL_WAZO_OBJ.customProv.enabledCustom} updateType={["customProv", "enabledCustom"]} updateFormValue={updateFormValue}/>
-                    <ToogleInput labelTitle="Activer Provisionning HTTPS Custom" defaultValue={INITIAL_WAZO_OBJ.customProv.enabledCustom_https} updateType={["customProv", "enabledCustom_https"]} updateFormValue={updateFormValue}/>
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-10">
+                    Vous pouvez activer le provisionning personnalisé pour utiliser un serveur de provisionning externe ou avec une URL différente que celle précisée ci-dessus. L'activation du provisionning HTTPS personnalisé nécessite que le provisionning HTTPS en question soit activé sur votre stack.
                 </div>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ToogleInput disabled={wazoFormObj.customProv.enabledCustom_https} toggleStyle={"success"} labelStyle={(wazoFormObj.customProv.enabledCustom)?"font-bold":""} labelTitle="Activer Provisionning Custom" defaultValue={INITIAL_WAZO_OBJ.customProv.enabledCustom} updateType={["customProv", "enabledCustom"]} updateFormValue={updateFormValue}/>
+                    <ToogleInput disabled={wazoFormObj.customProv.enabledCustom} toggleStyle={"success"} labelStyle={(wazoFormObj.customProv.enabledCustom_https)?"font-bold":""} labelTitle="Activer Provisionning HTTPS Custom" defaultValue={INITIAL_WAZO_OBJ.customProv.enabledCustom_https} updateType={["customProv", "enabledCustom_https"]} updateFormValue={updateFormValue}/>
+                    <InputText disabled={wazoFormObj.customProv.enabledCustom_https || !wazoFormObj.customProv.enabledCustom} labelTitle="Custom HTTP Server URL" defaultValue={INITIAL_WAZO_OBJ.customProv.stackCustomProvURL} updateType={["customProv", "stackCustomProvURL"]} updateFormValue={updateFormValue}/>
+                    <InputText disabled={wazoFormObj.customProv.enabledCustom || !wazoFormObj.customProv.enabledCustom_https} labelTitle="Custom HTTPS Server URL" defaultValue={INITIAL_WAZO_OBJ.customProv.stackCustomProvHTTPS} updateType={["customProv", "stackCustomProvHTTPS"]} updateFormValue={updateFormValue}/>
+                </div>
+                <div className="divider" ></div>
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-10 mb-10">
+                    <strong>Pour information :</strong> L'ensemble des URL de serveur de provisionning configurées ici seront utilisées pour la recherche des périphériques dans les serveurs RPS activés.
+                </div>
                 <div className="mt-16"><button className="btn btn-primary float-right" onClick={() => updateProfile()}>Enregistrer</button></div>
             </TitleCard>
         </>
