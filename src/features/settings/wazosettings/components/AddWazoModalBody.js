@@ -11,9 +11,6 @@ function AddWazoModalBody({ extraObject, closeModal}){
         const [errorMessage, setErrorMessage] = useState("")
     
         const { message, type, _id, errors } = extraObject
-        console.log("MODAL ERROR", extraObject);
-        
-
 
     return(
         <>
@@ -29,13 +26,10 @@ function AddWazoModalBody({ extraObject, closeModal}){
                         <tbody>
                         {
                             errors.map((l) => {
-                                // let mac = l.mac
-                                let macFormatted = l.mac
-
                                 return(
                                     <tr>
                                         <td>
-                                            <div className="font-bold">{macFormatted}</div>
+                                            <div className="font-bold">{l.mac}</div>
                                         </td>
                                         <td>{l.source}</td>
                                         <td>{l.message}</td>

@@ -8,9 +8,9 @@ import { wazoListDevices } from "../settings/wazosettings/WazoCallFunction"
 import { gearRender } from "./components/GearRender"
 import { setLoading } from "../common/loadingSlice"
 
-export const getLeadsContent = createAsyncThunk('/leads/content', async (_, {dispatch}) => {
+export const getLeadsContent = createAsyncThunk('/leads/content', async ({ setValueLoad, setIsFetching }, {dispatch}) => {
     const getStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
-    
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     //on regarde si un brand est actif, si cest le cas on retour "true", si ce n'est pas le cas "false", dans ce dernier cas on exécute pas l'appel API
     const brands = parseBrands(getStorage.settings)
     const brandEnabled = (brands.length > 0)? true : false
@@ -22,16 +22,12 @@ export const getLeadsContent = createAsyncThunk('/leads/content', async (_, {dis
             for (const b of brands) {
                 if (b.value === "yealink") {
                     // 3a:15:65:bb:b1:a1,3a:15:65:bb:b1:a2,3a:15:65:bb:b1:a3,3a:15:65:bb:b1:a4,3a:15:65:bb:b1:a5,3a:15:65:bb:b1:a7,3a:15:65:bb:b1:a8,3a:15:65:bb:b1:a9
-                    dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
-                    const dataFromYealink = await yealinkListDevices(dispatch)
-                    dispatch(showNotification({message : "On contacte Wazo", status : 1}));
-                    const dataFromWazo = await wazoListDevices(dispatch)
-                    // console.log(dataFromWazo);
-                    dispatch(showNotification({message : "Génération du tableau", status : 1}));
-                    const gearData = await gearRender(dataFromWazo, dataFromYealink, dispatch)
-                    // console.log(gearData);
                     
-                    // results.data.push(...gearData)
+                    const [dataFromYealink, dataFromWazo] = await Promise.all([
+                        yealinkListDevices(dispatch, { callback: (progress) => setValueLoad(progress) }),
+                        wazoListDevices(dispatch, { callback: (progress) => setValueLoad(progress) })
+                    ])
+                    const gearData = await gearRender(dataFromWazo, dataFromYealink, dispatch, { callback: (progress) => setValueLoad(progress) })
                     results.push(...gearData)
                 }
                 if (b.value === "fanvil") {
@@ -48,12 +44,12 @@ export const getLeadsContent = createAsyncThunk('/leads/content', async (_, {dis
                 }
             }
             // console.log(results);
-            
             return results;
         } catch (error) {
             throw error
         } finally {
             dispatch(setLoading(false))
+            setIsFetching(false)
         }
         
     } else {

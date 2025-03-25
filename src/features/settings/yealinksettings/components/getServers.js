@@ -49,22 +49,4 @@ export async function YealinkGetServers (dispatch) {
     } finally {
       dispatch(showNotification({message : "Récupération terminée", status : 1}))
     }
-    // await axios.request(Config)
-    // .then((response) => {
-    //     yealinkCred.settings.yealink.token = response.data.access_token
-    //     localStorage.setItem('wazo_plugin_rps', JSON.stringify(yealinkCred))
-    //     dispatch(showNotification({message : "Token rafraichis", status : 1}))
-    //     // dispatch(setTokenRefreshing(true))
-    // })
-    // .catch((error) => {
-    //   console.log("ERREUR YPD0005: " + error.message)
-    //   if (error.status === 401) {
-          
-    //       dispatch(showNotification({message : error.response.data.message, status : 0}))
-          
-    //   } else {
-    //       console.log(error);
-    //       // throw error;
-    //   }
-    // });
 };

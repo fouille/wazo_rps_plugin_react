@@ -1,10 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FilterMatchMode } from 'primereact/api';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
+import { ProgressBar } from "primereact/progressbar";
+import { Toast } from "primereact/toast";
 import moment from "moment"
 import { setLoading } from "../common/loadingSlice";
 import TitleCard from "../../components/Cards/TitleCard"
@@ -12,8 +14,13 @@ import { openModal } from "../common/modalSlice"
 import { getLeadsContent, setTokenRefreshing } from "./leadSlice"
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
 import { parseBrands } from "../../components/Functions/parseBrands"
+import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon'
+import FolderArrowDownIcon from '@heroicons/react/24/outline/FolderArrowDownIcon'
+import TrashIcon from '@heroicons/react/24/outline/TrashIcon'
+import PlusCircleIcon from '@heroicons/react/24/outline/PlusCircleIcon'
+import { DevicesProvider, useDevices } from './components/DevicesContext'
 
-const TopSideButtons = ({ isDeleteEnabled, onDelete, refresh }) => {
+const TopSideButtons = ({ isDeleteEnabled, onDelete, refresh, exportCSV, setValueLoad, setIsFetching}) => {
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
     //on regarde si un brand est actif, si cest le cas on retourne, si ce n'est pas le cas "disabled", dans ce dernier on affiche pas le bouton "ajouter"
@@ -21,51 +28,62 @@ const TopSideButtons = ({ isDeleteEnabled, onDelete, refresh }) => {
     const brandEnabled = (brands.length > 0)? "" : "disabled"
 
     const dispatch = useDispatch()
-
-    const openAddNewLeadModal = () => {
-        dispatch(openModal({title : "Nouveau.x périphérique.s", bodyType : MODAL_BODY_TYPES.LEAD_ADD_NEW}))
+    // const { setValueLoad, setIsFetching } = useDevices();
+    const openAddNewLeadModal = (setValueLoad, setIsFetching) => {
+        dispatch(openModal(
+            {
+            title : "Nouveau.x périphérique.s", 
+            bodyType : MODAL_BODY_TYPES.LEAD_ADD_NEW,
+            extraObject : {setValueLoad, setIsFetching} 
+            }
+        ))
     }
 
     return(
         <div className="inline-block float-right">
-            <button className="btn px-6 btn-sm normal-case btn-disable mr-5" onClick={refresh}>Actualiser</button>
-            <button disabled={!isDeleteEnabled} className="btn px-6 btn-sm normal-case btn-error mr-5" onClick={onDelete}>Supprimer</button>
-            <button disabled={brandEnabled} className="btn px-6 btn-sm normal-case btn-primary" onClick={() => openAddNewLeadModal()}>Ajouter</button>
+            <button className="btn px-6 btn-sm normal-case btn-disable mr-5" onClick={refresh}>< ArrowPathIcon className={'h-6 w-6'} />Actualiser</button>
+            <button className="btn px-6 btn-sm normal-case btn-disable mr-5" onClick={exportCSV}>< FolderArrowDownIcon className={'h-6 w-6'} />Exporter</button>
+            <button disabled={!isDeleteEnabled} className="btn px-6 btn-sm normal-case btn-error mr-5" onClick={onDelete}>< TrashIcon className={'h-6 w-6'} />Supprimer</button>
+            <button disabled={brandEnabled} className="btn px-6 btn-sm normal-case btn-primary" onClick={() => openAddNewLeadModal(setValueLoad, setIsFetching)}>< PlusCircleIcon className={'h-6 w-6'} />Ajouter</button>
         </div>
     )
 }
 
 function Devices(){
-
+    
     const {leads, isLoading, isTokenRefreshing } = useSelector(state => state.lead)
     const loading = useSelector(state => state.loading);
     // console.log(leads);
     
     const dispatch = useDispatch()
 
-    // const [checkedItems, setCheckedItems] = useState({});
+    // const { isFetching, setIsFetching, valueLoad, setValueLoad } = useDevices();
+    const [isFetching, setIsFetching] = useState(false);
+    const [valueLoad, setValueLoad] = useState(0);
     const [devices, setDevices] = useState([]);
     const [filters, setFilters] = useState({
         mac: { value: null, matchMode: FilterMatchMode.ENDS_WITH },
         brand: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     });
     const [selectedDevices, setSelectedDevices] = useState();
-    // const [rowClick, setRowClick] = useState(true);
-    // const [loading, setLoading] = useState(true);
+    const toast = useRef(null);
+    const dt = useRef(null);
 
     const fetchLeadsContent = () => {
+        setIsFetching(true);
+        setValueLoad(0);
         dispatch(setLoading(true));
-        dispatch(getLeadsContent())
-            .unwrap()
-            .then(data => {
-                setDevices(data);
-                setSelectedDevices([]);
-                dispatch(setLoading(false));
-            })
-            .catch(error => {
-                console.error('Failed to fetch leads content:', error);
-                dispatch(setLoading(false));
-            });
+        dispatch(getLeadsContent({setValueLoad, setIsFetching}))
+        .unwrap()
+        .then(data => {
+            setDevices(data);
+            setSelectedDevices([]);
+        })
+        .catch(error => {
+            console.error('Failed to fetch leads content:', error);
+            setIsFetching(false);
+            dispatch(setLoading(false));
+        });
     };
 
     useEffect(() => {
@@ -85,7 +103,7 @@ function Devices(){
         setSelectedDevices([]);
     }, [devices]);
 
-    const deleteCurrentLead = (leadsToDelete) => {
+    const deleteCurrentLead = (leadsToDelete, setValueLoad, setIsFetching) => {
         // console.log("deleteCurrentLead", leadsToDelete);
 
         const cleanedLeadsToDelete = leadsToDelete.map(lead => {
@@ -100,7 +118,9 @@ function Devices(){
             extraObject: {
                 message: `Etes-vous sûr de vouloir supprimer la sélection de ${cleanedLeadsToDelete.length} périphériques ?`,
                 type: CONFIRMATION_MODAL_CLOSE_TYPES.LEAD_DELETE,
-                cleanedLeadsToDelete
+                cleanedLeadsToDelete,
+                setValueLoad,
+                setIsFetching
             }
         }));
     };
@@ -112,6 +132,15 @@ function Devices(){
 
     const paginatorLeft = <Button type="button" icon="pi pi-refresh" text />;
     const paginatorRight = <Button type="button" icon="pi pi-download" text />;
+
+    const exportCSV = () => {
+        if (selectedDevices && selectedDevices.length > 0) {
+            dt.current.exportCSV({ selectionOnly: true });
+        } else {
+            dt.current.exportCSV({ selectionOnly: false });
+        }
+    };
+
     const formatMacAddress = (rowData) => {
         return rowData.mac.match(/.{1,2}/g).join(':');
     };
@@ -130,13 +159,29 @@ function Devices(){
         return rowData.serverUrl || rowData.uniqueServerUrl;
     };
 
-    return(
-        <>
-            
-            <TitleCard title="Liste des périphériques" topMargin="mt-2" TopSideButtons={<TopSideButtons isDeleteEnabled={isDeleteEnabled} onDelete={() => deleteCurrentLead(selectedDevices)} refresh={fetchLeadsContent} />}>
+    const getProgressBarColor = (value) => {
+        if (value < 40) {
+            return 'purple';
+        } else if (value < 80) {
+            return 'orange';
+        } else {
+            return 'green';
+        }
+    };
 
+    return(
+        <DevicesProvider>
+            
+            <TitleCard title="Liste des périphériques" topMargin="mt-2" TopSideButtons={<TopSideButtons isDeleteEnabled={isDeleteEnabled} onDelete={() => deleteCurrentLead(selectedDevices, setValueLoad, setIsFetching)} refresh={fetchLeadsContent} exportCSV={exportCSV} setValueLoad={setValueLoad} setIsFetching={setIsFetching} />}>
+            {isFetching && ( // Affiche la div  uniquement pendant le chargement
+                <div className="card">
+                    <Toast ref={toast}></Toast>
+                    <ProgressBar color={getProgressBarColor(valueLoad)} value={valueLoad}></ProgressBar>
+                </div>
+            )}
             <div className="overflow-x-auto w-full">
                 <DataTable 
+                            ref={dt}
                             value={devices} 
                             // footer={footer} 
                             removableSort
@@ -157,16 +202,16 @@ function Devices(){
                             onSelectionChange={(e) => setSelectedDevices(e.value)}
                             tableStyle={{ minWidth: '50rem' }}
                             >
-                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                     <Column field="mac" header="Mac" body={formatMacAddress} filter filterPlaceholder="Recherche par mac (fin)" sortable ></Column>
                     <Column field="brand" header="Constructeur" filter filterPlaceholder="Recherche par marque" ></Column>
                     <Column field="dateRegistered" body={dateRegistered} header="Créé le"></Column>
                     <Column field="lastConnected" body={formatLastConnected} header="Vu le"></Column>
-                    <Column field="serverUrl" body={getServerUrl} header="URL Provisionning"></Column>
+                    <Column exportField={getServerUrl} field="serverUrl" body={getServerUrl} header="URL Provisionning"></Column>
                 </DataTable >
             </div>
             </TitleCard>
-        </>
+            </DevicesProvider>
     )
 }
 

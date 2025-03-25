@@ -5,9 +5,9 @@ import { YealinkGetToken } from './getToken';
 
 const MAX_DEVICES_PER_REQUEST = 200;
 
-export const YealinkDelDevice = async (devices, dispatch) => {
+export const YealinkDelDevice = async (devices, dispatch, {callback}) => {
     // console.log("YL DEL DEVICES DATA", devices);
-
+    callback(0);
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"));
 
     const deleteDevicesBatch = async (devicesBatch) => {
@@ -49,7 +49,8 @@ export const YealinkDelDevice = async (devices, dispatch) => {
                 console.log("ERREUR YDD0001: " + error);
                 if (error.status === 401) {
                     await dispatch(YealinkGetToken(dispatch));
-                    return await deleteDevicesBatch(devicesBatch);
+                    const retour = await deleteDevicesBatch(devicesBatch);
+                    return retour;
                 }
                 if (error.status === 412) {
                     return [{
@@ -64,10 +65,16 @@ export const YealinkDelDevice = async (devices, dispatch) => {
     };
 
     const allResponses = [];
+    const totalBatches = Math.ceil(devices.length / MAX_DEVICES_PER_REQUEST);
+    let completedBatches = 0;
     for (let i = 0; i < devices.length; i += MAX_DEVICES_PER_REQUEST) {
         const devicesBatch = devices.slice(i, i + MAX_DEVICES_PER_REQUEST);
         const response = await deleteDevicesBatch(devicesBatch);
         allResponses.push(...response);
+        
+        completedBatches++;
+        const percentageCompleted = Math.round((completedBatches / totalBatches) * 100);
+        callback(percentageCompleted);
     }
 
     return allResponses;

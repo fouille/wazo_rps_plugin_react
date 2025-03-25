@@ -4,7 +4,8 @@ import { showNotification } from '../../../common/headerSlice.js'
 import { YealinkGetToken } from './getToken'
 import { formatMacAddressString } from '../../../../components/Functions/outils.js'
 
-export async function YealinkPostDevice (transformedData, dispatch) {
+export async function YealinkPostDevice (transformedData, dispatch, {callback}) {
+    callback(0);
     const yealinkToken = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     dispatch(showNotification({message : "Enregistrement RPS en cours", status : 1}));
     
@@ -28,7 +29,8 @@ export async function YealinkPostDevice (transformedData, dispatch) {
     const chunks = Array.from({ length: Math.ceil(yealinkDevices.length / 100) }, (v, i) =>
         yealinkDevices.slice(i * 100, i * 100 + 100)
     );
-
+    const totalChunks = chunks.length;
+    let completedChunks = 0;
     for (const chunk of chunks) {
         config.data = JSON.stringify(chunk);
         config.headers.nonce = randomString(32);
@@ -59,7 +61,7 @@ export async function YealinkPostDevice (transformedData, dispatch) {
                 console.log('Token refreshed');
                 console.log('Reloading data');
                 
-                await YealinkPostDevice(transformedData, dispatch);
+                await YealinkPostDevice(transformedData, dispatch, {callback});
                 return;
             } else {
                 console.log(error);
@@ -71,6 +73,9 @@ export async function YealinkPostDevice (transformedData, dispatch) {
                 allErrors = allErrors.concat(retour);
             }
         }
+        completedChunks++;
+        const percentageCompleted = Math.round((completedChunks / totalChunks) * 100);
+        callback(percentageCompleted);
     }
     return allErrors;
 }

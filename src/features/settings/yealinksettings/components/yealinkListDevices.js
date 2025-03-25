@@ -3,7 +3,8 @@ import { randomString } from "../../../../components/Functions/outils"
 import { showNotification } from "../../../common/headerSlice"
 import { YealinkGetToken } from "./getToken"
 
-export async function yealinkListDevices (dispatch) {
+export async function yealinkListDevices (dispatch, {callback}) {
+    callback(0)
     const getStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
 
@@ -43,6 +44,9 @@ export async function yealinkListDevices (dispatch) {
             allData = [...allData, ...result]
             skip += json.length
             total -= json.length
+
+            const percentageCompleted = Math.round((skip / (total + skip)) * 100)
+            callback(percentageCompleted)
         })
         .catch(async (error) => {
             hasError = true
@@ -58,7 +62,8 @@ export async function yealinkListDevices (dispatch) {
                 console.log('Reloading data')
                 //on reboucle la fonction pour retourner le résultat suite à un rafraichissement de token 
                 const result = await yealinkListDevices(dispatch)
-                return result
+                
+                allData = result
 
             } 
             if (error.response && error.response.status === 504) {
@@ -73,6 +78,6 @@ export async function yealinkListDevices (dispatch) {
         await delay(100)
 
     } while (total > 0 && !hasError)
-
+    
     return allData
 }
