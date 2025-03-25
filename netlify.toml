@@ -7,6 +7,6 @@
 
 [[redirects]]
   from = "/v2/*"
-  to = "https://eu-api.ymcs.yealink.com/:splat"
+  to = "https://eu-api.ymcs.yealink.com/v2/:splat"
   status = 200
   force = true
