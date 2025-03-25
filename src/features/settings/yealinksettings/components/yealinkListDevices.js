@@ -61,7 +61,7 @@ export async function yealinkListDevices (dispatch, {callback}) {
                 console.log('Token refreshed')
                 console.log('Reloading data')
                 //on reboucle la fonction pour retourner le résultat suite à un rafraichissement de token 
-                const result = await yealinkListDevices(dispatch)
+                const result = await yealinkListDevices(dispatch, {callback})
                 
                 allData = result
 
