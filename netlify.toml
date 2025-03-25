@@ -4,8 +4,8 @@
     Access-Control-Allow-Origin = "*"
 
 [[redirects]]
-  from = "/v2"
-  to = "https://eu-api.ymcs.yealink.com/"
+  from = "/v2/*"
+  to = "https://eu-api.ymcs.yealink.com/:splat"
   status = 200
   force = true
   headers = {X-From = "Wazo"}
