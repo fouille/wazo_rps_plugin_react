@@ -159,14 +159,12 @@ function Devices(){
         return rowData.serverUrl || rowData.uniqueServerUrl;
     };
 
-    const getProgressBarColor = (value) => {
-        if (value < 40) {
-            return 'purple';
-        } else if (value < 80) {
-            return 'orange';
-        } else {
-            return 'green';
-        }
+    const valueTemplate = (value) => {
+        return (
+            <React.Fragment>
+                Réglages tenant - {value}%
+            </React.Fragment>
+        );
     };
 
     return(
@@ -176,7 +174,7 @@ function Devices(){
             {isFetching && ( // Affiche la div  uniquement pendant le chargement
                 <div className="card">
                     <Toast ref={toast}></Toast>
-                    <ProgressBar color={getProgressBarColor(valueLoad)} value={valueLoad}></ProgressBar>
+                    <ProgressBar value={valueLoad} displayValueTemplate={valueTemplate} ></ProgressBar>
                 </div>
             )}
             <div className="overflow-x-auto w-full">

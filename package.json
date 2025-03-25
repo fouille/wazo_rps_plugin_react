@@ -1,6 +1,6 @@
 {
   "name": "wazo_rps_plugin_react",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Dashboard RPS Plugin",
   "scripts": {
     "start": "react-scripts start",
