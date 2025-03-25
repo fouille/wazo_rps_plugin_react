@@ -2,3 +2,10 @@
   for = "/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
+
+[[redirects]]
+  from = "/v2"
+  to = "https://eu-api.ymcs.yealink.com/"
+  status = 200
+  force = true
+  headers = {X-From = "Wazo"}
