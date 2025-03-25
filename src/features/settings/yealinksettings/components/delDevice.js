@@ -49,7 +49,7 @@ export const YealinkDelDevice = async (devices, dispatch, {callback}) => {
                 console.log("ERREUR YDD0001: " + error);
                 if (error.status === 401) {
                     await dispatch(YealinkGetToken(dispatch));
-                    const retour = await deleteDevicesBatch(devicesBatch);
+                    const retour = await deleteDevicesBatch(devicesBatch, dispatch, {callback});
                     return retour;
                 }
                 if (error.status === 412) {

@@ -2,3 +2,11 @@
   for = "/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "*"
+    Access-Control-Allow-Headers = "*"
+
+[[redirects]]
+  from = "/v2/*"
+  to = "https://eu-api.ymcs.yealink.com/v2/:splat"
+  status = 200
+  force = true
