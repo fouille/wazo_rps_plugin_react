@@ -7,24 +7,20 @@ import { YealinkDelDevice } from "../../settings/yealinksettings/components/delD
 import { wazoDelDevice } from "../../settings/wazosettings/WazoCallFunction";
 import { showNotification } from '../headerSlice'
 import { getLeadsContent } from '../../devices/leadSlice'
-import { LoadingInterface } from "../../../components/Functions/outils";
 import { setLoading } from "../loadingSlice";
 
 function ConfirmationModalBody({ extraObject, closeModal}){
 
     const dispatch = useDispatch()
-    // const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const { message, type, _id, cleanedLeadsToDelete } = extraObject
+    const { message, type, _id, cleanedLeadsToDelete, setValueLoad, setIsFetching } = extraObject
 
     const proceedWithYes = async() => {
-        // setLoading(true) // Définir loading sur true avant les appels asynchrones
         dispatch(setLoading(true));
-        // LoadingInterface(true)
         try {
             if(type === CONFIRMATION_MODAL_CLOSE_TYPES.LEAD_DELETE){
-
+                setIsFetching(true)
                 // Regrouper les leads par brand
                 const groupedLeads = cleanedLeadsToDelete.reduce((acc, lead) => {
                     let { brand, id, id_wazo, mac } = lead;
@@ -43,15 +39,10 @@ function ConfirmationModalBody({ extraObject, closeModal}){
                 closeModal()
                 for (const brand of Object.keys(groupedLeads)) {
                     if (brand === "yealink") {
-                        dispatch(showNotification({message : `On contacte ${brand}`, status : 1}));
-                        dispatch(showNotification({message : "Suppression des appareils Yealink RPS", status : 1}));
-                        const ydd = await YealinkDelDevice(groupedLeads[brand].map(lead => ({ deviceIds: lead.id, mac: lead.mac })), dispatch);
-                        dispatch(showNotification({message : "Suppression des appareils Yealink terminé", status : 1}));
-                        dispatch(showNotification({message : "Suppression des appareils Wazo en cours...", status : 1}));
-                        const wdd = await wazoDelDevice(groupedLeads[brand].map(lead => ({ id_wazo: lead.id_wazo, mac: lead.mac })));
-                        dispatch(showNotification({message : "Suppression des appareils Wazo Terminé", status : 1}));
-    
-
+                        const [ydd, wdd] = await Promise.all([
+                            YealinkDelDevice(groupedLeads[brand].map(lead => ({ deviceIds: lead.id, mac: lead.mac })), dispatch, { callback: (progress) => {setValueLoad(progress)} }),
+                            wazoDelDevice(groupedLeads[brand].map(lead => ({ id_wazo: lead.id_wazo, mac: lead.mac })), { callback: (progress) => {setValueLoad(progress)} })
+                        ]);
                         const combinedResults = [...ydd, ...wdd].sort((a, b) => a.mac.localeCompare(b.mac))
                         // Transformer les résultats pour masquer la deuxième clé MAC si elle est identique à la précédente
                         // Cela permet de ne pas afficher la même erreur pour chaque appareil sur le modal d'erreur
@@ -71,6 +62,7 @@ function ConfirmationModalBody({ extraObject, closeModal}){
                                 size: 'lg',
                                 extraObject: { errors: transformedResults }
                             }));
+                            dispatch(getLeadsContent({setValueLoad, setIsFetching}))
                         }
                     }
                     if (brand === "fanvil") {
@@ -88,7 +80,7 @@ function ConfirmationModalBody({ extraObject, closeModal}){
         } catch (error) {
             setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
         } finally {
-            dispatch(getLeadsContent());
+            dispatch(getLeadsContent({setValueLoad, setIsFetching}))
         }
     }
 

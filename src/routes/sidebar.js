@@ -17,12 +17,12 @@ const routes = [
   {
     path: '/app/devices', // url
     icon: <InboxArrowDownIcon className={iconClasses}/>, // icon component
-    name: 'Postes', // name that appear in Sidebar
+    name: 'Périphériques', // name that appear in Sidebar
   },
   {
     path: '', //no url needed as this has submenu
     icon: <Cog6ToothIcon className={`${iconClasses} inline` }/>, // icon component
-    name: 'Settings', // name that appear in Sidebar
+    name: 'Paramètres', // name that appear in Sidebar
     submenu : [
       {
         path: '/app/settings-fanvil', //url

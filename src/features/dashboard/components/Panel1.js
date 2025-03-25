@@ -7,10 +7,10 @@ function Panel1(){
       <Text>
         Ce plugin vous permets : <br />
         <br />
-        <li class="ml-5">D'activer ou de désactiver des Serveurs RPS</li>
-        <li class="ml-5">D'ajouter des périphériques à un serveur RPS et à votre site Wazo</li>
-        <li class="ml-5">De supprimer des périphériques d'un serveur RPS et de votre site Wazo</li>
-        <li class="ml-5">De réaliser des ajouts et des suppressions en masse</li>
+        <li className='ml-5'>D'activer ou de désactiver des Serveurs RPS</li>
+        <li className='ml-5'>D'ajouter des périphériques à un serveur RPS et à votre site Wazo</li>
+        <li className='ml-5'>De supprimer des périphériques d'un serveur RPS et de votre site Wazo</li>
+        <li className='ml-5'>De réaliser des ajouts et des suppressions en masse</li>
       </Text>
       </TitleCard>
     )

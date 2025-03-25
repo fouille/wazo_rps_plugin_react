@@ -2,7 +2,8 @@ import { showNotification } from "../../common/headerSlice";
 import { stackServerProvdURL } from "../../../components/Functions/outils";
 
 //Fonction moteur permettant le retour normé pour la construction du tableau Devices
-export function gearRender (wazo, brand, dispatch) {
+export function gearRender (wazo, brand, dispatch, {callback}) {
+    callback(0);
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
     //ici on tient compte des anciens réglages fait en filtrant aussi les servers URL configurés
@@ -18,7 +19,14 @@ export function gearRender (wazo, brand, dispatch) {
     //par simplicité on combine les deux types de filtres
     //le filtre boolean permet de retirer les potentielles valeurs de serveurs vide
     const serverFilters = [stackProvURL, stackProvHTTPS, stackCustomProvURL, stackCustomProvHTTPS].filter(Boolean);
- 
+    
+    // Initialisation du pourcentage et de l'intervalle pour le loader
+    let percentageCompleted = 0;
+    const interval = setInterval(() => {
+        percentageCompleted = Math.min(percentageCompleted + 10, 100);
+        callback(percentageCompleted);
+    }, 1000);
+
     //on filtre les données recues par le brand, Le filtre est composé du serveur de provisionning Wazo (HTTPS si actif et HTTP) et des adresses mac connues dans le tenant. 
     // const filteredData = brand
     //     .filter(l => {
@@ -42,6 +50,11 @@ export function gearRender (wazo, brand, dispatch) {
         const wazoItem = wazo.find(w => w.mac === l.mac);
         return { ...l, id_wazo: wazoItem ? wazoItem.id : null };
     });
+
+    // Arrêt de l'intervalle et mise à jour du pourcentage à 100%
+    clearInterval(interval);
+    callback(100);
+
     // console.log("Filtered Data:", filteredData);
     
     return filteredData

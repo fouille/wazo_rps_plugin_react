@@ -14,5 +14,11 @@ const combinedReducer = {
 }
 
 export default configureStore({
-    reducer: combinedReducer
+    reducer: combinedReducer,
+    //permet de ne pas avoir les erreurs de non-serialisation des objets 
+    // (quand on passe une fonction à travers une fonction sans middleware)
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+      }),
 })

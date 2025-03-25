@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { useDispatch } from "react-redux"
 import InputText from '../../../components/Input/InputText'
 import TextAreaInput from "../../../components/Input/TextAreaInput"
 import SelectBox from '../../../components/Input/SelectBox'
+// import { Dropdown } from 'primereact/dropdown';
+// import { FloatLabel } from 'primereact/floatlabel';
 import ErrorText from '../../../components/Typography/ErrorText'
 import { formatMacAddress, stackServerProvdURL, transformData } from '../../../components/Functions/outils'
 import { YealinkPostDevice } from "../../settings/yealinksettings/components/postDevices"
@@ -10,10 +12,12 @@ import { wazoCreateDevice } from "../../settings/wazosettings/WazoCallFunction"
 import { parseBrands } from "../../../components/Functions/parseBrands"
 import { getLeadsContent } from "../leadSlice"
 import { setLoading } from "../../common/loadingSlice"
-import { openModal } from "../../common/modalSlice"
+import { openModal, closeModal } from "../../common/modalSlice"
 import { MODAL_BODY_TYPES } from "../../../utils/globalConstantUtil"
 import { showNotification } from "../../common/headerSlice"
 import { YealinkGetServers } from "../../settings/yealinksettings/components/getServers"
+// import { useDevices, DevicesProvider } from './DevicesContext'
+// import { use } from "react"
 
 const INITIAL_LEAD_OBJ = {
     brands: [],
@@ -23,7 +27,7 @@ const INITIAL_LEAD_OBJ = {
     serverId: ""
 }
 
-function AddLeadModalBody({ closeModal }) {
+function AddLeadModalBody({ closeModal, extraObject }) {
     const dispatch = useDispatch()
     //si présent en localstorage on ajoute la valeur de url de provd dans le lead object par defaut
     const dataStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
@@ -35,6 +39,8 @@ function AddLeadModalBody({ closeModal }) {
     const [errorMessage, setErrorMessage] = useState("")
     const [leadObj, setLeadObj] = useState(INITIAL_LEAD_OBJ)
     const [ServerLeadObj, setServerLeadObj] = useState([])
+    // const [selectedServer, setSelectedServer] = useState(null);
+    const { setValueLoad, setIsFetching } = extraObject;
 
     const fetchListServers = async () => {
         setLoader(true)
@@ -78,13 +84,13 @@ function AddLeadModalBody({ closeModal }) {
                 dispatch(setLoading(true)) // Définir loading sur true avant les appels asynchrones
 
                 try {
-                    const ycd = await YealinkPostDevice(devices, dispatch)
-                    dispatch(showNotification({ message: "Création des appareils Dans Wazo en cours...", status: 1 }));
-                    const wcd = await wazoCreateDevice(devices, dispatch)
-                    dispatch(showNotification({ message: "Création des appareils Dans Wazo Terminé", status: 1 }));
-                    console.log("YCD", ycd);
-                    console.log("WCD", wcd);
-
+                    dispatch(showNotification({ message: "Création des appareils en cours...", status: 1 }));
+                    setIsFetching(true)
+                    
+                    const [ycd, wcd] = await Promise.all([
+                        YealinkPostDevice(devices, dispatch, { callback: (progress) => setValueLoad(progress) }),
+                        wazoCreateDevice(devices, dispatch, { callback: (progress) => setValueLoad(progress) })
+                    ])
 
                     const combinedResults = [...ycd, ...wcd].sort((a, b) => a.mac.localeCompare(b.mac))
                     // Transformer les résultats pour masquer la deuxième clé MAC si elle est identique à la précédente
@@ -106,13 +112,13 @@ function AddLeadModalBody({ closeModal }) {
                             size: 'lg',
                             extraObject: { errors: transformedResults }
                         }));
+                        dispatch(getLeadsContent({setValueLoad, setIsFetching}))
                     }
-
-                    // dispatch(getLeadsContent())
                 } catch (error) {
                     setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
                 } finally {
-                    dispatch(getLeadsContent())
+                    setIsFetching(true)
+                    dispatch(getLeadsContent({setValueLoad, setIsFetching}))
                 }
 
             } else {
@@ -135,7 +141,34 @@ function AddLeadModalBody({ closeModal }) {
 
             <InputText disabled={!!leadObj.serverId} type="text" defaultValue={leadObj.uniqueServerUrl} updateType="uniqueServerUrl" containerStyle="mt-4" labelTitle="URL de provisionning" updateFormValue={updateFormValue} />
 
-            <SelectBox options={leadObj.brands} defaultValue={leadObj.brand} updateType="brand" containerStyle="w-full mt-4" labelStyle={"text-base-content"} labelTitle="Constructeur" labelDescription="Ceci vous permet de choisir le bon serveur RPS" placeholder="Choisir" updateFormValue={updateFormValue} />
+            <SelectBox 
+                options={leadObj.brands} 
+                defaultValue={leadObj.brand} 
+                updateType="brand" 
+                containerStyle="w-full mt-4" 
+                labelStyle={"text-base-content"} 
+                labelTitle="Constructeur" 
+                labelDescription="Ceci vous permet de choisir le bon serveur RPS" 
+                placeholder="Choisir" 
+                updateFormValue={updateFormValue} 
+            />
+            {/* <FloatLabel className="w-full md:w-14rem">
+                <Dropdown 
+                    inputId="dd-serverid"
+                    value={leadObj.brand}
+                    onChange={(e) => {
+                        console.log("e.value", e);
+                        
+                        setLeadObj(e.value)}} 
+                    options={leadObj.brands} 
+                    optionLabel="name" 
+                    checkmark={true} 
+                    highlightOnSelect={false}
+                    className="w-full md:w-14rem"
+                    placeholder="Choisir" 
+                />
+                <label htmlFor="dd-serverid">Choisir la marque</label>
+            </FloatLabel> */}
 
             {
                 leadObj.brand === "yealink" ? (
@@ -152,6 +185,25 @@ function AddLeadModalBody({ closeModal }) {
                         updateFormValue={updateFormValue} 
                         loading={loading}
                         />
+                        {/* <FloatLabel className="w-full md:w-14rem">
+                            <Dropdown 
+                                inputId="dd-serverid"
+                                value={selectedServer}
+                                onChange={(e) => {
+                                    console.log("e.value", e);
+                                    
+                                    setSelectedServer(e.value)}} 
+                                options={ServerLeadObj} 
+                                optionLabel="name" 
+                                editable 
+                                // placeholder="Choisir" 
+                                className="w-full md:w-14rem"
+                                loading={loading}
+                                // placeholder="Choisir..."
+                            />
+                            <label htmlFor="dd-serverid">Choisir un serveur (optionnel)</label>
+                        </FloatLabel> */}
+                        
                     </>
                     ) : ""
                 
