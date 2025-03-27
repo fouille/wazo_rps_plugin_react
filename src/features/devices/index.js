@@ -14,11 +14,10 @@ import { openModal } from "../common/modalSlice"
 import { getLeadsContent, setTokenRefreshing } from "./leadSlice"
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
 import { parseBrands } from "../../components/Functions/parseBrands"
-import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon'
-import FolderArrowDownIcon from '@heroicons/react/24/outline/FolderArrowDownIcon'
-import TrashIcon from '@heroicons/react/24/outline/TrashIcon'
-import PlusCircleIcon from '@heroicons/react/24/outline/PlusCircleIcon'
+import { ArrowPathIcon, FolderArrowDownIcon, TrashIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
 import { DevicesProvider, useDevices } from './components/DevicesContext'
+import capitalize from 'lodash/capitalize'
+const Text = ({ children }) => <span textsizeadjust="true">{children}</span>
 
 const TopSideButtons = ({ isDeleteEnabled, onDelete, refresh, exportCSV, setValueLoad, setIsFetching}) => {
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
@@ -71,7 +70,7 @@ function Devices(){
 
     const fetchLeadsContent = () => {
         setIsFetching(true);
-        setValueLoad(0);
+        setValueLoad(","+0);
         dispatch(setLoading(true));
         dispatch(getLeadsContent({setValueLoad, setIsFetching}))
         .unwrap()
@@ -104,13 +103,11 @@ function Devices(){
     }, [devices]);
 
     const deleteCurrentLead = (leadsToDelete, setValueLoad, setIsFetching) => {
-        // console.log("deleteCurrentLead", leadsToDelete);
 
         const cleanedLeadsToDelete = leadsToDelete.map(lead => {
             const { dateRegistered, ipAddress, lastConnected, remark, serverId, serverName, serverUrl, sn, uniqueServerUrl, ...rest } = lead; // Remplacez key1, key2 par les clés que vous souhaitez supprimer
             return rest;
          });
-        //  console.log("clean : ", cleanedLeadsToDelete);
          
         dispatch(openModal({
             title: "Confirmation",
@@ -128,8 +125,6 @@ function Devices(){
 
     const isDeleteEnabled = selectedDevices && selectedDevices.length > 0 ;
 
-    // const footer = `In total there are ${devices ? devices.length : 0} devices.`;
-
     const paginatorLeft = <Button type="button" icon="pi pi-refresh" text />;
     const paginatorRight = <Button type="button" icon="pi pi-download" text />;
 
@@ -145,26 +140,42 @@ function Devices(){
         return rowData.mac.match(/.{1,2}/g).join(':');
     };
     const dateRegistered = (rowData) => {
-        return moment(rowData.dateRegistered).format("DD MMM YY");
+        if (rowData.dateRegistered) {
+            return moment(rowData.dateRegistered).format("DD MMM YY");
+        } else {
+            return "N/A";
+        }
     }
     const formatLastConnected = (rowData) => {
         if (rowData.lastConnected) {
             return <div className="badge badge-success">{moment(rowData.lastConnected).format("DD MMM YY")}</div>;
         } else {
-            return <div className="badge badge-warning">Jamais vu</div>
+            return <div className="badge badge-warning">Non communiqué</div>
         }
         
     };
     const getServerUrl = (rowData) => {
-        return rowData.serverUrl || rowData.uniqueServerUrl;
+        if (rowData.serverUrl || rowData.uniqueServerUrl) {
+            return rowData.serverUrl || rowData.uniqueServerUrl;
+        } else {
+            return "Non communiqué";
+        }
     };
 
     const valueTemplate = (value) => {
+        console.log(value);
+        
+        const {text, percent} = decomposeData(value);
         return (
             <React.Fragment>
-                Réglages tenant - {value}%
+                <Text>Traitement {capitalize(text)} - {percent}%</Text>
             </React.Fragment>
         );
+    };
+
+    const decomposeData = (data) => {
+        const [text, percent] = data.split(',');
+        return { text, percent };
     };
 
     return(
@@ -174,7 +185,7 @@ function Devices(){
             {isFetching && ( // Affiche la div  uniquement pendant le chargement
                 <div className="card">
                     <Toast ref={toast}></Toast>
-                    <ProgressBar value={valueLoad} displayValueTemplate={valueTemplate} ></ProgressBar>
+                    <ProgressBar value={decomposeData(valueLoad).percent} displayValueTemplate={() => valueTemplate(valueLoad)} ></ProgressBar>
                 </div>
             )}
             <div className="overflow-x-auto w-full">

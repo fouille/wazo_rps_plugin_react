@@ -4,7 +4,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { showNotification } from '../common/headerSlice'
 import { parseBrands } from '../../components/Functions/parseBrands'
 import { yealinkListDevices } from "../settings/yealinksettings/components/yealinkListDevices"
-import { wazoListDevices } from "../settings/wazosettings/WazoCallFunction"
+import { fanvilRequest } from "../settings/fanvilsettings/components/fanvilRequest"
+import { wazoListDevices } from "../settings/wazosettings/components/WazoCallFunction"
 import { gearRender } from "./components/GearRender"
 import { setLoading } from "../common/loadingSlice"
 
@@ -17,21 +18,27 @@ export const getLeadsContent = createAsyncThunk('/leads/content', async ({ setVa
     
     if (brandEnabled) {
         const results = [];
+        const dataDevicesGlobal = []
         dispatch(setLoading(true))
         try {
             for (const b of brands) {
                 if (b.value === "yealink") {
                     // 3a:15:65:bb:b1:a1,3a:15:65:bb:b1:a2,3a:15:65:bb:b1:a3,3a:15:65:bb:b1:a4,3a:15:65:bb:b1:a5,3a:15:65:bb:b1:a7,3a:15:65:bb:b1:a8,3a:15:65:bb:b1:a9
                     
-                    const [dataFromYealink, dataFromWazo] = await Promise.all([
-                        yealinkListDevices(dispatch, { callback: (progress) => setValueLoad(progress) }),
-                        wazoListDevices(dispatch, { callback: (progress) => setValueLoad(progress) })
-                    ])
-                    const gearData = await gearRender(dataFromWazo, dataFromYealink, dispatch, { callback: (progress) => setValueLoad(progress) })
-                    results.push(...gearData)
+                    // const [dataFromYealink, dataFromWazo] = await Promise.all([
+                    //     yealinkListDevices(dispatch, { callback: (progress) => setValueLoad(progress) }),
+                    //     wazoListDevices(dispatch, { callback: (progress) => setValueLoad(progress) })
+                    // ])
+                    dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
+                    const yealinkList = await yealinkListDevices(dispatch, { callback: (progress) => setValueLoad(progress) })
+                    dataDevicesGlobal.push(...yealinkList)
+                    // const gearData = await gearRender(dataFromWazo, dataFromYealink, dispatch, { callback: (progress) => setValueLoad(progress) })
+                    // results.push(...gearData)
                 }
                 if (b.value === "fanvil") {
                     dispatch(showNotification({message : `On contacte ${b.name}`, status : 1}))
+                    const fanvilList = await fanvilRequest("listDevices", dispatch, { callback: (progress) => setValueLoad(progress) })
+                    dataDevicesGlobal.push(...fanvilList)
                     // Ajoutez ici l'appel API pour fanvil si nécessaire
                 }
                 if (b.value === "snom") {
@@ -43,6 +50,10 @@ export const getLeadsContent = createAsyncThunk('/leads/content', async ({ setVa
                     // Ajoutez ici l'appel API pour gigaset si nécessaire
                 }
             }
+            dispatch(showNotification({message : `Finalisation`, status : 1}))
+            const dataFromWazo = await wazoListDevices(dispatch, { callback: (progress) => setValueLoad(progress) })
+            const gearData = await gearRender(dataFromWazo, dataDevicesGlobal, dispatch, { callback: (progress) => setValueLoad(progress) })
+            results.push(...gearData)
             // console.log(results);
             return results;
         } catch (error) {

@@ -7,7 +7,7 @@ const MAX_DEVICES_PER_REQUEST = 200;
 
 export const YealinkDelDevice = async (devices, dispatch, {callback}) => {
     // console.log("YL DEL DEVICES DATA", devices);
-    callback(0);
+    callback('yealink,'+0);
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"));
 
     const deleteDevicesBatch = async (devicesBatch) => {
@@ -74,7 +74,7 @@ export const YealinkDelDevice = async (devices, dispatch, {callback}) => {
         
         completedBatches++;
         const percentageCompleted = Math.round((completedBatches / totalBatches) * 100);
-        callback(percentageCompleted);
+        callback('yealink,'+percentageCompleted);
     }
 
     return allResponses;

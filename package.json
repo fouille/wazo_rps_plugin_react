@@ -1,6 +1,6 @@
 {
   "name": "wazo_rps_plugin_react",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Dashboard RPS Plugin",
   "scripts": {
     "start": "react-scripts start",
@@ -62,7 +62,9 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "autoprefixer": "^10.4.21",
+    "crypto-js": "^4.2.0",
     "daisyui": "^5.0.9",
+    "fast-xml-parser": "^5.0.9",
     "postcss": "^8.4.19",
     "primereact": "^10.9.3",
     "tailwindcss": "^3.4.17"

@@ -1,11 +1,11 @@
 import axios from "axios";
-import { convertMacFormat, LoadingInterface, formatMacAddressString } from "../../../components/Functions/outils";
-import { showNotification } from "../../common/headerSlice";
-
+import { convertMacFormat, formatMacAddressString } from "../../../../components/Functions/outils";
+import { showNotification } from "../../../common/headerSlice";
+import simulateProgress from "../../../../components/Functions/simulateProgress";
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function wazoListDevices (dispatch, {callback}) {
-    callback(0);
+    callback('wazo,'+0);
     const wazoData = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
     const config = {
@@ -19,36 +19,38 @@ export async function wazoListDevices (dispatch, {callback}) {
         }
     };
 
-    // calcul interval de temps pour le loader
-    let percentageCompleted = 0;
-    const interval = setInterval(() => {
-        percentageCompleted = Math.min(percentageCompleted + 10, 100);
-        callback(percentageCompleted);
-    }, 1000);
+    // Créez un signal d'arrêt pour la progression
+    const stopSignal = { isCancelled: false };
+
+    // Simuler la progression en parallèle
+    simulateProgress(callback, 'wazo', stopSignal);
 
     const response = await axios.request(config)
     .then((data) => {
-        clearInterval(interval);
+        
         const items = data.data.items
         //on recupère et on ne convertis qu'uniquement les mac address
         const results = items.map(obj => ({
             mac: convertMacFormat(obj.mac),
             id: obj.id
         }));
-        callback(100);
+        callback('wazo,'+100);
         return results;
     })
     .catch((error) => {
         console.log(error);
+        stopSignal.isCancelled = true; // Arrêtez également en cas d'erreur
         throw error;
     })
 
+    // Arrêtez la progression une fois que les données sont prêtes
+    stopSignal.isCancelled = true;
     return response;
 };
 
 export async function wazoCreateDevice (devices, dispatch, {callback} ) {
     dispatch(showNotification({ message: "WAZO : Création des appareils en cours...", status: 1 }));
-    callback(0);
+    callback('wazo,'+0);
     const retour = []
     const totalDevices = devices.for_brands.length;
     
@@ -73,6 +75,11 @@ export async function wazoCreateDevice (devices, dispatch, {callback} ) {
         } catch (error) {
             if (error.status === 401) {
                 console.log( "Wazo : " + error.response.statusText);
+                retour.push({
+                    "source": "Wazo",
+                    "mac": device.mac,
+                    "message": error.response.statusText
+                });
                 
             } else if (error.status === 400) {
                 retour.push({
@@ -86,7 +93,7 @@ export async function wazoCreateDevice (devices, dispatch, {callback} ) {
         }
         completedDevices++;
         const percentageCompleted = Math.round((completedDevices / totalDevices) * 100);
-        callback(percentageCompleted);
+        callback('wazo,'+percentageCompleted);
     }
     dispatch(showNotification({ message: "Création des appareils Dans Wazo Terminé", status: 1 }));
     return retour
@@ -113,7 +120,7 @@ async function wazoResetDevice (device) {
 };
 
 export async function wazoDelDevice (devices, { callback }) {
-    callback(0);
+    callback('wazo,'+0);
     const wazoData = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     // dispatch(showNotification({message : "Suppression des appareils Wazo en cours...", status : 1}));
     // setLoading(true)
@@ -152,7 +159,7 @@ export async function wazoDelDevice (devices, { callback }) {
         }
         completedDevices++;
         const percentageCompleted = Math.round((completedDevices / totalDevices) * 100);
-        callback(percentageCompleted);
+        callback('wazo,'+percentageCompleted);
     }
     return retour
 };

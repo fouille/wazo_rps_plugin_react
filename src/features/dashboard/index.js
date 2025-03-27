@@ -1,6 +1,7 @@
 import DashboardRpsStats from './components/DashboardRpsStats'
 import Panel1 from './components/Panel1'
 import Panel2 from './components/Panel2'
+import User from './components/User'
 import { parseBrandsDashboard } from '../../components/Functions/parseBrands'
 
 
@@ -24,7 +25,10 @@ function Dashboard(){
             </div>
 
 
-
+        {/** ---------------------- Blocs Identification ------------------------- */}
+        <div className="grid lg:grid-cols-1 mt-4 grid-cols-1 gap-12">
+                <User />
+            </div>
         {/** ---------------------- Blocs accueil du Dashboard ------------------------- */}
             <div className="grid lg:grid-cols-2 mt-4 grid-cols-1 gap-6">
                 <Panel1 />

@@ -5,7 +5,7 @@ import { YealinkGetToken } from './getToken'
 import { formatMacAddressString } from '../../../../components/Functions/outils.js'
 
 export async function YealinkPostDevice (transformedData, dispatch, {callback}) {
-    callback(0);
+    callback('yealink,'+0);
     const yealinkToken = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
     dispatch(showNotification({message : "Enregistrement RPS en cours", status : 1}));
     
@@ -75,7 +75,7 @@ export async function YealinkPostDevice (transformedData, dispatch, {callback}) 
         }
         completedChunks++;
         const percentageCompleted = Math.round((completedChunks / totalChunks) * 100);
-        callback(percentageCompleted);
+        callback('yealink,'+percentageCompleted);
     }
     return allErrors;
 }

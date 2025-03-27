@@ -30,6 +30,9 @@ const baseStructure = {
         }
     },
     global : {
+        appFirstname : "",
+        appLastname : "",
+        accountType : "",
         stackDomain : "",
         stackToken : "",
         stackTenantUUID : "",
@@ -77,6 +80,9 @@ async function updateObjStack(objects, context) {
     const domainStack = 'https://' + context.app.extra.stack.host + ':' + context.app.extra.stack.port;
     const userTokenStack = context.app.extra.stack.session.token;
     const userTenantIdStack = context.app.extra.tenant;
+    const accountType = context.app.extra.administrator.organization.resource;
+    const appFirstname = context.app.extra.administrator.firstname;
+    const appLastname = context.app.extra.administrator.lastname;
 
     // Fusionner baseStructure avec les objets pour s'assurer que toutes les clés sont présentes, supprime aussi  si une ancienne clé est en trop.
     mergeObjects(baseStructure, objects);
@@ -86,6 +92,9 @@ async function updateObjStack(objects, context) {
     objects.global.stackProvSettings.stackProvHTTPS = domainStack + "/device/provisioning/"
     objects.global.stackToken = userTokenStack
     objects.global.stackTenantUUID = userTenantIdStack
+    objects.global.accountType = accountType
+    objects.global.appFirstname = appFirstname
+    objects.global.appLastname = appLastname
     localStorage.setItem("wazo_plugin_rps", JSON.stringify(objects))
 }
 

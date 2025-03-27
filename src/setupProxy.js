@@ -8,4 +8,11 @@ module.exports = function(app) {
       changeOrigin: true,
     })
   );
+  app.use(
+    '/fanvil',
+    createProxyMiddleware({
+      target: 'https://fdps.fanvil.com/xmlrpc.php',
+      changeOrigin: true,
+    })
+  );
 };

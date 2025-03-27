@@ -1,19 +1,19 @@
 {
     "manifestVersion": "0.1",
     "version": "1.2.0",
-    "id": "fmw-wazo-plugin-rps-dev",
-    "packageName": "io.wazo.portal.pbx-rps-dev",
+    "id": "fmw-wazo-plugin-rps-beta",
+    "packageName": "io.wazo.portal.pbx-rps-beta",
     "productType": "portal",
     "name" : {
-      "short": "Dev | Plugin Wazo <> RPS",
-      "full": "Dev | Plugin Wazo <> RPS"
+      "short": "Beta | Plugin Wazo <> RPS",
+      "full": "Beta | Plugin Wazo <> RPS"
     },
     "developer": {
       "name": "FMW"
     },
     "description": {
-      "short": "Dev | Plugin d'automatisation RPS",
-      "full": "Dev | Plugin d'automatisation de création de périphériques dans un site Wazo EUC et dans un RPS de destination (Gigaset, Fanvil, Snom et Yealink)"
+      "short": "Beta | Plugin d'automatisation RPS",
+      "full": "Beta | Plugin d'automatisation de création de périphériques dans un site Wazo EUC et dans un RPS de destination (Gigaset, Fanvil, Snom et Yealink)"
     },
     "icons": 
       {
@@ -21,9 +21,9 @@
       },
     "staticTabs": [
       {
-        "entityId": "portal-rps-provisioning-dev",
+        "entityId": "portal-rps-provisioning-beta",
         "context": ["pbxMenu"],
-        "name": "Provisionning RPS (Dev)",
+        "name": "Provisionning RPS (Beta)",
         "parent": "common.layout.pbxMenu.userManagement",
         "contentUrl": "./index.html"
       }

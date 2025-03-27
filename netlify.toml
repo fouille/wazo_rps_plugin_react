@@ -10,3 +10,9 @@
   to = "https://eu-api.ymcs.yealink.com/v2/:splat"
   status = 200
   force = true
+
+[[redirects]]
+from = "/fanvil"
+to = "https://fdps.fanvil.com/xmlrpc.php"
+status = 200
+force = true

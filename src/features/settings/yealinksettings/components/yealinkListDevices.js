@@ -4,7 +4,7 @@ import { showNotification } from "../../../common/headerSlice"
 import { YealinkGetToken } from "./getToken"
 
 export async function yealinkListDevices (dispatch, {callback}) {
-    callback(0)
+    callback('yealink,'+0)
     const getStorage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
 
@@ -46,7 +46,7 @@ export async function yealinkListDevices (dispatch, {callback}) {
             total -= json.length
 
             const percentageCompleted = Math.round((skip / (total + skip)) * 100)
-            callback(percentageCompleted)
+            callback('yealink,'+percentageCompleted)
         })
         .catch(async (error) => {
             hasError = true

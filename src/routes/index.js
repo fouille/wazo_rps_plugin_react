@@ -11,6 +11,7 @@ const FanvilSettings = lazy(() => import('../pages/protected/FanvilSettings'))
 const YealinkSettings = lazy(() => import('../pages/protected/YealinkSettings'))
 const SnomSettings = lazy(() => import('../pages/protected/SnomSettings'))
 const WazoSettings = lazy(() => import('../pages/protected/WazoSettings'))
+const AppSettings = lazy(() => import('../pages/protected/AppSettings'))
 
 const routes = [
   {
@@ -40,6 +41,10 @@ const routes = [
   {
     path: '/settings-wazo',
     component: WazoSettings,
+  },
+  {
+    path: '/settings-app',
+    component: AppSettings,
   },
   {
     path: '/404',
