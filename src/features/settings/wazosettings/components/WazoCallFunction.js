@@ -1,7 +1,7 @@
 import axios from "axios";
-import { convertMacFormat, formatMacAddressString } from "../../../components/Functions/outils";
-import { showNotification } from "../../common/headerSlice";
-import simulateProgress from "../../../components/Functions/simulateProgress";
+import { convertMacFormat, formatMacAddressString } from "../../../../components/Functions/outils";
+import { showNotification } from "../../../common/headerSlice";
+import simulateProgress from "../../../../components/Functions/simulateProgress";
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function wazoListDevices (dispatch, {callback}) {

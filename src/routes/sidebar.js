@@ -1,8 +1,8 @@
 import Squares2X2Icon from '@heroicons/react/24/outline/Squares2X2Icon'
 import CircleStackIcon from '@heroicons/react/24/outline/CircleStackIcon'
 import Cog6ToothIcon from '@heroicons/react/24/outline/Cog6ToothIcon'
-import CogIcon from '@heroicons/react/24/outline/CogIcon'
 import InboxArrowDownIcon from '@heroicons/react/24/outline/InboxArrowDownIcon'
+import ArrowDownTrayIcon from '@heroicons/react/24/outline/ArrowDownTrayIcon'
 import PhoneIcon from '@heroicons/react/24/outline/PhoneIcon'
 
 const iconClasses = `h-6 w-6`
@@ -52,8 +52,8 @@ const routes = [
       },
       {
         path: '/app/settings-app', // url
-        icon: <CogIcon className={submenuIconClasses}/>, // icon component
-        name: 'Application', // name that appear in Sidebar
+        icon: <ArrowDownTrayIcon className={submenuIconClasses}/>, // icon component
+        name: 'Sauvegarde', // name that appear in Sidebar
       }
     ]
   }

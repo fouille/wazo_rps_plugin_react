@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { openModal } from "../modalSlice";
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../../utils/globalConstantUtil'
 import { YealinkDelDevice } from "../../settings/yealinksettings/components/delDevice";
-import { wazoDelDevice } from "../../settings/wazosettings/WazoCallFunction";
+import { wazoDelDevice } from "../../settings/wazosettings/components/WazoCallFunction";
 import { fanvilDelRequest } from "../../settings/fanvilsettings/components/fanvilRequest";
 import { showNotification } from '../headerSlice'
 import { getLeadsContent } from '../../devices/leadSlice'

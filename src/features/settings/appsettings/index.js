@@ -26,7 +26,7 @@ function AppSettings(){
     return(
         <>
             
-            <TitleCard title="Application | Réglages" topMargin="mt-2">
+            <TitleCard title="Application | Sauvegarde" topMargin="mt-2">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-10">
                     <Text>
                         Les états de configuration étant stockés localement dans votre navigateur, vous pouvez les exporter et les importer.
@@ -52,7 +52,7 @@ function AppSettings(){
                         ref={fileInputRef}
                         onChange={(e) => setSelectedFile(e.target.files[0])}
                     />
-                    <button className="btn btn-primary ml-5" onClick={handleImport}>Importer</button>
+                    <button disabled={!selectedFile} className="btn btn-primary ml-5" onClick={handleImport}>Importer</button>
                     </div>
                 </div>
             </TitleCard>

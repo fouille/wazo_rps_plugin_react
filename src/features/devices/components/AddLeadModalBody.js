@@ -8,7 +8,7 @@ import SelectBox from '../../../components/Input/SelectBox'
 import ErrorText from '../../../components/Typography/ErrorText'
 import { formatMacAddress, stackServerProvdURL, transformData } from '../../../components/Functions/outils'
 import { YealinkPostDevice } from "../../settings/yealinksettings/components/postDevices"
-import { wazoCreateDevice } from "../../settings/wazosettings/WazoCallFunction"
+import { wazoCreateDevice } from "../../settings/wazosettings/components/WazoCallFunction"
 import { parseBrands } from "../../../components/Functions/parseBrands"
 import { getLeadsContent } from "../leadSlice"
 import { setLoading } from "../../common/loadingSlice"

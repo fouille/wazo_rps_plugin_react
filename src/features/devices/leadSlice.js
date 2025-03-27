@@ -5,7 +5,7 @@ import { showNotification } from '../common/headerSlice'
 import { parseBrands } from '../../components/Functions/parseBrands'
 import { yealinkListDevices } from "../settings/yealinksettings/components/yealinkListDevices"
 import { fanvilRequest } from "../settings/fanvilsettings/components/fanvilRequest"
-import { wazoListDevices } from "../settings/wazosettings/WazoCallFunction"
+import { wazoListDevices } from "../settings/wazosettings/components/WazoCallFunction"
 import { gearRender } from "./components/GearRender"
 import { setLoading } from "../common/loadingSlice"
 
