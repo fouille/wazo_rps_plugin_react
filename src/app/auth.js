@@ -11,7 +11,6 @@ const initializePortal = async () => {
     await portal.initialize();
     const context = portal.getContext();
     const fontFamily = context.app.theme.typography.fontFamily;
-
     // Appliquer la police d'écriture à l'ensemble de l'application
     if (fontFamily) {
       document.body.style.fontFamily = fontFamily;
@@ -34,9 +33,9 @@ const checkAccountType = (accountType) => {
     case 'administrators':
       return true;
     case 'customers':
-      return false;
+      return true;
     case 'locations':
-      return false;
+      return true;
     default:
       return false;
   }

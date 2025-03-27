@@ -7,7 +7,9 @@ import PhoneIcon from '@heroicons/react/24/outline/PhoneIcon'
 
 const iconClasses = `h-6 w-6`
 const submenuIconClasses = `h-5 w-5`
-
+const storage = localStorage.getItem('wazo_plugin_rps')
+const accountType = JSON.parse(storage).global.accountType
+// console.log(accountType)
 const routes = [
 
   {
@@ -21,12 +23,25 @@ const routes = [
     name: 'Périphériques', // name that appear in Sidebar
   },
   {
-    path: '', //no url needed as this has submenu
+    path: '', // no url needed as this has submenu
     icon: <Cog6ToothIcon className={`${iconClasses} inline` }/>, // icon component
     name: 'Paramètres', // name that appear in Sidebar
-    submenu : [
+    submenu: [
       {
-        path: '/app/settings-fanvil', //url
+        path: '/app/settings-app', // url
+        icon: <ArrowDownTrayIcon className={submenuIconClasses}/>, // icon component
+        name: 'Sauvegarde', // name that appear in Sidebar
+      },
+    ]
+  }
+]
+// Trouver l'objet "Paramètres" dans les routes
+const settingsRoute = routes.find(route => route.name === 'Paramètres')
+// Ajouter dynamiquement les routes pour les revendeurs et administrateurs
+if (accountType === 'resellers' || accountType === 'administrators') {
+  settingsRoute.submenu.push(
+      {
+        path: '/app/settings-fanvil', // url
         icon: <CircleStackIcon className={submenuIconClasses}/>, // icon component
         name: 'Fanvil', // name that appear in Sidebar
       },
@@ -49,16 +64,9 @@ const routes = [
         path: '/app/settings-wazo', // url
         icon: <PhoneIcon className={submenuIconClasses}/>, // icon component
         name: 'Wazo', // name that appear in Sidebar
-      },
-      {
-        path: '/app/settings-app', // url
-        icon: <ArrowDownTrayIcon className={submenuIconClasses}/>, // icon component
-        name: 'Sauvegarde', // name that appear in Sidebar
       }
-    ]
-  }
-  
-]
+    )
+}
 
 export default routes
 
