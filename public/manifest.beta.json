@@ -1,6 +1,6 @@
 {
     "manifestVersion": "0.1",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "id": "fmw-wazo-plugin-rps-beta",
     "packageName": "io.wazo.portal.pbx-rps-beta",
     "productType": "portal",

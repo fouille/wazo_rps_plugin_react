@@ -39,7 +39,7 @@ const routes = [
 const settingsRoute = routes.find(route => route.name === 'Paramètres')
 // Ajouter dynamiquement les routes pour les revendeurs et administrateurs
 if (accountType === 'resellers' || accountType === 'administrators') {
-  settingsRoute.submenu.push(
+  settingsRoute.submenu.unshift(
       {
         path: '/app/settings-fanvil', // url
         icon: <CircleStackIcon className={submenuIconClasses}/>, // icon component
