@@ -1,6 +1,7 @@
 import Squares2X2Icon from '@heroicons/react/24/outline/Squares2X2Icon'
 import CircleStackIcon from '@heroicons/react/24/outline/CircleStackIcon'
 import Cog6ToothIcon from '@heroicons/react/24/outline/Cog6ToothIcon'
+import CogIcon from '@heroicons/react/24/outline/CogIcon'
 import InboxArrowDownIcon from '@heroicons/react/24/outline/InboxArrowDownIcon'
 import PhoneIcon from '@heroicons/react/24/outline/PhoneIcon'
 
@@ -48,6 +49,11 @@ const routes = [
         path: '/app/settings-wazo', // url
         icon: <PhoneIcon className={submenuIconClasses}/>, // icon component
         name: 'Wazo', // name that appear in Sidebar
+      },
+      {
+        path: '/app/settings-app', // url
+        icon: <CogIcon className={submenuIconClasses}/>, // icon component
+        name: 'Application', // name that appear in Sidebar
       }
     ]
   }
