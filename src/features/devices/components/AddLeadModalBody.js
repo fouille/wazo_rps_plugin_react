@@ -16,6 +16,8 @@ import { openModal, closeModal } from "../../common/modalSlice"
 import { MODAL_BODY_TYPES } from "../../../utils/globalConstantUtil"
 import { showNotification } from "../../common/headerSlice"
 import { YealinkGetServers } from "../../settings/yealinksettings/components/getServers"
+import { fanvilRequest, fanvilAddRequest } from "../../settings/fanvilsettings/components/fanvilRequest"
+import capitalize from 'lodash/capitalize'
 // import { useDevices, DevicesProvider } from './DevicesContext'
 // import { use } from "react"
 
@@ -42,9 +44,10 @@ function AddLeadModalBody({ closeModal, extraObject }) {
     // const [selectedServer, setSelectedServer] = useState(null);
     const { setValueLoad, setIsFetching } = extraObject;
 
-    const fetchListServers = async () => {
+    const fetchYealinkListServers = async (brand) => {
         setLoader(true)
-        await YealinkGetServers(dispatch)
+        if (brand === "yealink") {
+            await YealinkGetServers(dispatch)
             .then(data => {
                 const transformedData = data.map(server => ({
                     name: server.serverName,
@@ -53,19 +56,29 @@ function AddLeadModalBody({ closeModal, extraObject }) {
                 setServerLeadObj(transformedData)
                 setLoader(false)
             })
+        }
+        if (brand === "fanvil") {
+            await fanvilRequest("listServers", dispatch, { }).then(data => {
+                const transformedData = data.map(server => ({
+                    name: server,
+                    value: server
+                }))
+                setServerLeadObj(transformedData)
+                setLoader(false)
+            })
+        }
+        
     }
 
     useEffect(()=> {
-        if (leadObj.brand === "yealink") {
-            fetchListServers()
-        }
-
+            fetchYealinkListServers(leadObj.brand)
     }, [leadObj.brand])
 
     const saveNewLead = async () => {
         if (leadObj.mac.trim() === "") return setErrorMessage("MAC is required!")
         else if (leadObj.uniqueServerUrl.trim() === "") return setErrorMessage("URL is required!")
         else if (leadObj.brand.trim() === "") return setErrorMessage("Constructeur requis!")
+        else if (leadObj.serverId.trim() === "" && leadObj.brand === "fanvil") return setErrorMessage("Serveur Profil requis!")
         else {
             closeModal()
             const sendDeviceInfo = {
@@ -112,7 +125,50 @@ function AddLeadModalBody({ closeModal, extraObject }) {
                             size: 'lg',
                             extraObject: { errors: transformedResults }
                         }));
-                        dispatch(getLeadsContent({setValueLoad, setIsFetching}))
+                    }
+                } catch (error) {
+                    setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
+                } finally {
+                    setIsFetching(true)
+                    dispatch(getLeadsContent({setValueLoad, setIsFetching}))
+                }
+
+            } 
+            
+            if (leadObj.brand === "fanvil"){
+                const devices = transformData(sendDeviceInfo)
+                dispatch(setLoading(true)) // Définir loading sur true avant les appels asynchrones
+
+                try {
+                    dispatch(showNotification({ message: "Création des appareils en cours...", status: 1 }));
+                    setIsFetching(true)
+                    
+                    const [fcd, wcd] = await Promise.all([
+                        fanvilAddRequest(devices, dispatch, { callback: (progress) => setValueLoad(progress) }),
+                        wazoCreateDevice(devices, dispatch, { callback: (progress) => setValueLoad(progress) })
+                    ])
+
+
+                    const combinedResults = [...fcd, ...wcd].sort((a, b) => a.mac.localeCompare(b.mac))
+                    // Transformer les résultats pour masquer la deuxième clé MAC si elle est identique à la précédente
+                    // Cela permet de ne pas afficher la même erreur pour chaque appareil sur le modal d'erreur
+                    const transformedResults = combinedResults.map((result, index, array) => {
+                        if (index > 0 && result.mac === array[index - 1].mac) {
+                            return {
+                                ...result,
+                                mac: ""
+                            };
+                        }
+                        return result;
+                    });
+
+                    if (transformedResults.length > 0) {
+                        dispatch(openModal({
+                            title: "Erreur.s lors de l'ajout",
+                            bodyType: MODAL_BODY_TYPES.ERROR,
+                            size: 'lg',
+                            extraObject: { errors: transformedResults }
+                        }));
                     }
                 } catch (error) {
                     setErrorMessage("Une erreur s'est produite lors de la création du périphérique.")
@@ -139,7 +195,7 @@ function AddLeadModalBody({ closeModal, extraObject }) {
 
             <TextAreaInput type="text" defaultValue={leadObj.mac} updateType="mac" containerStyle="mt-4" labelTitle="Adresse MAC" labelDescription="Pour un import de masse, les séparateurs espace, virgule et point-virgule sont acceptés" updateFormValue={updateFormValue} />
 
-            <InputText disabled={!!leadObj.serverId} type="text" defaultValue={leadObj.uniqueServerUrl} updateType="uniqueServerUrl" containerStyle="mt-4" labelTitle="URL de provisionning" updateFormValue={updateFormValue} />
+            <InputText disabled={!!leadObj.serverId || leadObj.brand === 'fanvil'} type="text" defaultValue={leadObj.uniqueServerUrl} updateType="uniqueServerUrl" containerStyle="mt-4" labelTitle="URL de provisionning" updateFormValue={updateFormValue} />
 
             <SelectBox 
                 options={leadObj.brands} 
@@ -171,7 +227,7 @@ function AddLeadModalBody({ closeModal, extraObject }) {
             </FloatLabel> */}
 
             {
-                leadObj.brand === "yealink" ? (
+                leadObj.brand === "yealink" || leadObj.brand === "fanvil" ? (
                     <>
                         <SelectBox 
                         options={ServerLeadObj} 
@@ -180,7 +236,7 @@ function AddLeadModalBody({ closeModal, extraObject }) {
                         containerStyle="w-full mt-4" 
                         labelStyle={"text-base-content"} 
                         labelTitle="Serveur profil" 
-                        labelDescription="Choix du modèle serveur Yealink pré-configuré" 
+                        labelDescription={`Choix du modèle serveur ${capitalize(leadObj.brand)} pré-configuré`} 
                         placeholder="Aucun" 
                         updateFormValue={updateFormValue} 
                         loading={loading}

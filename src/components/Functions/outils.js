@@ -11,6 +11,20 @@ export const randomString = (length=1) => {
 // convertisseur de mac address au format sans ":" (utiliser pour reformater les macs en provenance de Wazo)
 export const convertMacFormat = (mac) => mac.replace(/:/g, '');
 
+//formateur de mac address au format xx:xx:xx:xx:xx retourne sous forme de tableau
+export const formatMacAddress = (macs) => {
+  // Split the input string by commas, spaces, or semicolons to get individual MAC addresses
+  const macArray = macs.split(/[,;\s\n]+/).filter(mac => mac);
+
+  // Process each MAC address
+  return macArray.map(mac => {
+    // Remove all non-alphanumeric characters
+    const cleanedMac = mac.replace(/[^a-fA-F0-9]/g, '').toLowerCase();
+    // Add colons every two characters
+    return cleanedMac.match(/.{1,2}/g).join(':');
+  });
+};
+
 // convertisseur de mac address au format xx:xx:xx:xx:xx retourne mac/mac
 export const formatMacAddressString = (macs) => {
   // Split the input string by commas, spaces, or semicolons to get individual MAC addresses
@@ -28,17 +42,12 @@ export const formatMacAddressString = (macs) => {
   return formattedMacs.join(',');
 };
 
-//formateur de mac address au format xx:xx:xx:xx:xx retourne sous forme de tableau
-export const formatMacAddress = (macs) => {
-  // Split the input string by commas, spaces, or semicolons to get individual MAC addresses
-  const macArray = macs.split(/[,;\s\n]+/).filter(mac => mac);
-
-  // Process each MAC address
+// Formateur de mac address au format tableau, en minuscules et sans ":"
+export const formatMacAddressPlain = (macArray) => {
+  // Process chaque adresse MAC
   return macArray.map(mac => {
-    // Remove all non-alphanumeric characters
-    const cleanedMac = mac.replace(/[^a-fA-F0-9]/g, '').toLowerCase();
-    // Add colons every two characters
-    return cleanedMac.match(/.{1,2}/g).join(':');
+    // Supprime tous les caractères non alphanumériques
+    return mac.replace(/[^a-fA-F0-9]/g, '').toLowerCase();
   });
 };
 
@@ -92,4 +101,8 @@ export const stackServerProvdURL = (getStorage) => {
 //affichage forcé du loading
 export const LoadingInterface = (usage) => {
   return usage ? document.body.classList.add('loading-indicator') : document.body.classList.remove('loading-indicator');
+}
+
+export const openLink = (url) => {
+  window.open(url, "_blank")
 }

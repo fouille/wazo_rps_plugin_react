@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 import TitleCard from "../../../components/Cards/TitleCard"
-
+import { openLink } from "../../../components/Functions/outils"
 import { showNotification } from '../../common/headerSlice'
 import InputText from '../../../components/Input/InputText'
 import ToogleInput from '../../../components/Input/ToogleInput'
@@ -47,10 +47,6 @@ function YealinkSettings() {
             dispatch(SetLocalStorage())
             dispatch(updateProfile())
         }
-    }
-
-    const openLink = (url) => {
-        window.open(url, "_blank")
     }
 
     const updateFormValue = ({ updateType, value }) => {

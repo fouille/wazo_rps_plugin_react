@@ -3,7 +3,11 @@ import { stackServerProvdURL } from "../../../components/Functions/outils";
 
 //Fonction moteur permettant le retour normé pour la construction du tableau Devices
 export function gearRender (wazo, brand, dispatch, {callback}) {
-    callback(0);
+    callback(','+0);
+    // On applatit le tableau brand pour faciliter le traitement
+    const flattenedBrand = brand.reduce((acc, val) => acc.concat(val), []);
+    // console.table(flattenedBrand);
+    
     const storage = JSON.parse(localStorage.getItem("wazo_plugin_rps"))
 
     //ici on tient compte des anciens réglages fait en filtrant aussi les servers URL configurés
@@ -24,8 +28,8 @@ export function gearRender (wazo, brand, dispatch, {callback}) {
     let percentageCompleted = 0;
     const interval = setInterval(() => {
         percentageCompleted = Math.min(percentageCompleted + 10, 100);
-        callback(percentageCompleted);
-    }, 1000);
+        callback('gear,'+percentageCompleted);
+    }, 100);
 
     //on filtre les données recues par le brand, Le filtre est composé du serveur de provisionning Wazo (HTTPS si actif et HTTP) et des adresses mac connues dans le tenant. 
     // const filteredData = brand
@@ -43,9 +47,15 @@ export function gearRender (wazo, brand, dispatch, {callback}) {
     // return filteredData
     
     //identique au code si dessus, juste refactoré.
-    const filteredData = brand
-    .filter(l => (serverFilters.includes(l.serverUrl) || serverFilters.includes(l.uniqueServerUrl)) 
-        && wazo.some(w => w.mac === l.mac))
+    const filteredData = flattenedBrand
+    .filter(l => {
+        // Si les clés serverUrl ou uniqueServerUrl n'existent pas (donc en dehors de Yealink), on considère serverMatch comme "true"
+        const serverMatch = (!l.serverUrl && !l.uniqueServerUrl) || 
+                            (l.serverUrl && serverFilters.includes(l.serverUrl)) || 
+                            (l.uniqueServerUrl && serverFilters.includes(l.uniqueServerUrl));
+        const macMatch = wazo.some(w => w.mac === l.mac);
+        return serverMatch && macMatch;
+    })
     .map(l => {
         const wazoItem = wazo.find(w => w.mac === l.mac);
         return { ...l, id_wazo: wazoItem ? wazoItem.id : null };
@@ -53,7 +63,7 @@ export function gearRender (wazo, brand, dispatch, {callback}) {
 
     // Arrêt de l'intervalle et mise à jour du pourcentage à 100%
     clearInterval(interval);
-    callback(100);
+    callback('gear,'+100);
 
     // console.log("Filtered Data:", filteredData);
     
