@@ -15,7 +15,7 @@ initializeApp()
 
 
 // Check for login and initialize axios
-const token = checkAuth()
+const token = await checkAuth()
 
 
 function App() {
