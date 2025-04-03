@@ -1,0 +1,35 @@
+{
+    "manifestVersion": "0.1",
+    "version": "1.3.0",
+    "id": "fmw-wazo-plugin-rps-dev-pr",
+    "packageName": "io.wazo.portal.pbx-rps-dev-pr",
+    "productType": "portal",
+    "name" : {
+      "short": "Dev PR | Plugin Wazo <> RPS",
+      "full": "Dev PR | Plugin Wazo <> RPS"
+    },
+    "developer": {
+      "name": "FMW"
+    },
+    "description": {
+      "short": "Dev PR | Plugin d'automatisation RPS",
+      "full": "Dev PR | Plugin d'automatisation de création de périphériques dans un site Wazo EUC et dans un RPS de destination (Gigaset, Fanvil, Snom et Yealink)"
+    },
+    "icons": 
+      {
+        "color": "https://avatars.githubusercontent.com/u/68688703?s=200&v=4"
+      },
+    "staticTabs": [
+      {
+        "entityId": "portal-rps-provisioning-dev-pr",
+        "context": ["pbxMenu"],
+        "name": "Provisionning RPS (Dev PR)",
+        "parent": "common.layout.pbxMenu.userManagement",
+        "contentUrl": "./index.html"
+      }
+    ],
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+  }
+  

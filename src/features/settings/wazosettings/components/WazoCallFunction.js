@@ -39,6 +39,9 @@ export async function wazoListDevices (dispatch, {callback}) {
     })
     .catch((error) => {
         console.log(error);
+        if (error.status === 401) {
+            dispatch(showNotification({ message: "WAZO : Erreur d'authentification", status: 0 }));
+        }
         stopSignal.isCancelled = true; // Arrêtez également en cas d'erreur
         throw error;
     })
@@ -75,6 +78,7 @@ export async function wazoCreateDevice (devices, dispatch, {callback} ) {
         } catch (error) {
             if (error.status === 401) {
                 console.log( "Wazo : " + error.response.statusText);
+                dispatch(showNotification({ message: "WAZO : Erreur d'authentification", status: 0 }));
                 retour.push({
                     "source": "Wazo",
                     "mac": device.mac,
@@ -150,6 +154,9 @@ export async function wazoDelDevice (devices, { callback }) {
             await wazoResetDevice(device.id_wazo);
             await axios.request(config);
         } catch (error) {
+            // if (error.status === 401) {
+            //     dispatch(showNotification({ message: "WAZO : Erreur d'authentification", status: 0 }));
+            // }
             // showNotification({message : `Erreur lors de la suppression de l'appareil ${device}`, status : 0});
             retour.push({
                 "source": "Wazo",
